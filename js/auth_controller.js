@@ -1,7 +1,14 @@
 // AgriSure Climate-Aware Credit Risk Assessment System — Authentication, Dashboard & Application Controller
 
 const AUTH_STORAGE_KEY = 'AGRISURE_AUTH_SESSION';
-const API_BASE_AUTH = (window.location.port === '8000') ? '' : 'http://localhost:8000';
+function getApiBaseAuth() {
+  const h = window.location.hostname;
+  const p = window.location.port;
+  if (h !== 'localhost' && h !== '127.0.0.1') return '';
+  if (p === '8000' || p === '8080' || !p) return '';
+  return `http://localhost:${p || '8000'}`;
+}
+const API_BASE_AUTH = getApiBaseAuth();
 let currentUserSession = null;
 
 document.addEventListener('DOMContentLoaded', () => {

@@ -5,7 +5,14 @@ document.addEventListener('DOMContentLoaded', () => {
   initCropInsights();
 });
 
-const API_BASE = (window.location.port === '8000') ? '' : 'http://localhost:8000';
+function getApiBaseCrop() {
+  const h = window.location.hostname;
+  const p = window.location.port;
+  if (h !== 'localhost' && h !== '127.0.0.1') return '';
+  if (p === '8000' || p === '8080' || !p) return '';
+  return `http://localhost:${p || '8000'}`;
+}
+const API_BASE = getApiBaseCrop();
 
 let currentCropDataset = 'crop_recommendation_water';
 let currentCropPage = 1;
