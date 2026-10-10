@@ -71,20 +71,26 @@ if FASTAPI_AVAILABLE:
     app.include_router(farmer_router)
     app.include_router(officer_router)
 
-    # Mount Static Web Application Files
+    # Mount Static Web Application Files (checks frontend/ directory first)
     from fastapi.staticfiles import StaticFiles
     project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    
-    if os.path.exists(os.path.join(project_root, "css")):
-        app.mount("/css", StaticFiles(directory=os.path.join(project_root, "css")), name="css")
-    if os.path.exists(os.path.join(project_root, "js")):
-        app.mount("/js", StaticFiles(directory=os.path.join(project_root, "js")), name="js")
-    if os.path.exists(os.path.join(project_root, "data")):
-        app.mount("/data", StaticFiles(directory=os.path.join(project_root, "data")), name="data")
+    frontend_dir = os.path.join(project_root, "frontend")
+    static_root = frontend_dir if os.path.exists(frontend_dir) else project_root
+
+    css_path = os.path.join(static_root, "css")
+    js_path = os.path.join(static_root, "js")
+    data_path = os.path.join(static_root, "data")
+
+    if os.path.exists(css_path):
+        app.mount("/css", StaticFiles(directory=css_path), name="css")
+    if os.path.exists(js_path):
+        app.mount("/js", StaticFiles(directory=js_path), name="js")
+    if os.path.exists(data_path):
+        app.mount("/data", StaticFiles(directory=data_path), name="data")
 
     @app.get("/")
     def read_root():
-        index_path = os.path.join(project_root, "index.html")
+        index_path = os.path.join(static_root, "index.html")
         if os.path.exists(index_path):
             return FileResponse(index_path)
         return {
@@ -111,7 +117,7 @@ if FASTAPI_AVAILABLE:
     @app.get("/{page_route}")
     def serve_spa_page(page_route: str):
         if page_route.lower() in SPA_PAGE_ROUTES:
-            index_path = os.path.join(project_root, "index.html")
+            index_path = os.path.join(static_root, "index.html")
             if os.path.exists(index_path):
                 return FileResponse(index_path)
         raise HTTPException(status_code=404, detail=f"Endpoint or page '/{page_route}' not found.")

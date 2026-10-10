@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>AgriSure — Redirecting...</title>
+  <script>
+    // Preserves clean path URL across static server 404 fallbacks
+    var path = window.location.pathname + window.location.search + window.location.hash;
+    sessionStorage.setItem('agrisure_spa_redirect', path);
+    window.location.replace('/index.html');
+  </script>
+</head>
+<body>
+  <p style="font-family: sans-serif; padding: 2rem; color: #0d9488;">Loading AgriSure System...</p>
+</body>
+</html>

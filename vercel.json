@@ -10,8 +10,8 @@
       "destination": "/backend/main.py"
     },
     {
-      "source": "/((?!css|js|data|api|backend|.*\\..*).*)",
-      "destination": "/index.html"
+      "source": "/((?!css|js|data|api|backend|frontend|.*\\..*).*)",
+      "destination": "/frontend/index.html"
     }
   ]
 }

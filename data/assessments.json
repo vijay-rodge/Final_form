@@ -1,9 +1,9 @@
 [
   {
-    "assessment_id": "ASSESS-20261010120237",
+    "assessment_id": "ASSESS-20261010121120",
     "farmer_id": "DEMO001",
     "loan_id": "LOAN001",
-    "timestamp": "2026-10-10T12:02:37.803471",
+    "timestamp": "2026-10-10T12:11:20.022276",
     "model_version": "v2.1-prototype-calibrated",
     "overall_risk_classification": "Moderate",
     "climate_risk_classification": "Low",
@@ -128,9 +128,9 @@
         }
       ],
       "missing_fields": [
+        "satellite_ndvi",
         "Live APMC Mandi Price API",
         "market_apmc_live",
-        "satellite_ndvi",
         "Satellite Live NDVI Vegetation Stream"
       ],
       "demo_data_badges": [

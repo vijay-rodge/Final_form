@@ -1,0 +1,20 @@
+{
+  "name": "agrisure-frontend",
+  "version": "2.0.0",
+  "description": "AgriSure — Climate-Aware Credit Risk Assessment System Frontend SPA",
+  "main": "index.html",
+  "scripts": {
+    "dev": "python serve.py 8080",
+    "start": "python serve.py 8080",
+    "serve": "python serve.py 8080"
+  },
+  "keywords": [
+    "agrisure",
+    "agriculture-finance",
+    "climate-credit-risk",
+    "spa",
+    "javascript"
+  ],
+  "author": "AgriSure Engineering",
+  "license": "MIT"
+}

@@ -68,5 +68,17 @@
     "officer_id": "OFFICER_GOOGLE_107",
     "district": "Dharwad",
     "state": "Karnataka"
+  },
+  {
+    "username": "jaybhosler@gmail.com",
+    "email": "jaybhosler@gmail.com",
+    "google_sub": "111748691605172443027",
+    "full_name": "Jay Bhosle",
+    "role": "farmer",
+    "auth_provider": "google",
+    "farmer_id": "DEMO108",
+    "officer_id": null,
+    "district": "Dharwad",
+    "state": "Karnataka"
   }
 ]
