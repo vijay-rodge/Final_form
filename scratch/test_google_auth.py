@@ -49,7 +49,7 @@ def test_google_authentication_flow():
     os.environ["GOOGLE_CLIENT_ID"] = "1234567890-testclientid.apps.googleusercontent.com"
     os.environ["GOOGLE_CLIENT_SECRET"] = "GOCSPX-TestClientSecretKey2026"
     os.environ["GOOGLE_REDIRECT_URI"] = "http://localhost:8000/api/v2/auth/google/callback"
-    os.environ["GOOGLE_OFFICER_EMAILS"] = "bank.officer.test@nabard.in,officer1@bank.org"
+    os.environ["GOOGLE_OFFICER_EMAILS"] = "bank.officer.test@agrisure.in,officer1@bank.org"
 
     cfg_resp2 = client.get("/api/v2/auth/google/config")
     assert cfg_resp2.status_code == 200

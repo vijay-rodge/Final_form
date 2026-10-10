@@ -28,7 +28,7 @@ def get_bank_details_for_farmer(farmer_id: str, income: float, loan: float) -> D
     num = int(num_str) if num_str else 1
     
     bank_names = [
-        "State Bank of India (NABARD Partner Branch)",
+        "State Bank of India (AgriSure Partner Branch)",
         "Bank of Baroda Agricultural Finance",
         "Punjab National Bank Rural Branch",
         "Canara Bank Farmer Credit Division",

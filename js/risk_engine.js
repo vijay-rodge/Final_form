@@ -1,4 +1,4 @@
-// NABARD FIN-03 Dynamic Climate-Aware Credit Risk Assessment Engine
+// AgriSure FIN-03 Dynamic Climate-Aware Credit Risk Assessment Engine
 
 class ClimateCreditRiskEngine {
   constructor() {
@@ -121,7 +121,7 @@ class ClimateCreditRiskEngine {
     } else if (climateCreditScore >= 610) {
       decision = 'CONDITIONAL APPROVAL';
       badgeClass = 'badge-warning';
-      decisionReason = 'Approved subject to mandatory NABARD PM Fasal Bima Crop Insurance top-up & Drip Irrigation installation.';
+      decisionReason = 'Approved subject to mandatory AgriSure PM Fasal Bima Crop Insurance top-up & Drip Irrigation installation.';
     }
 
     return {

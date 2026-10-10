@@ -11,7 +11,7 @@ from pydantic import BaseModel
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 USERS_FILE = os.path.join(BASE_DIR, "data", "users.json")
-SECRET_KEY = "NABARD_SECRET_KEY_CLIMATE_CREDIT_RISK_2026_PROD_DEMO"
+SECRET_KEY = "AGRISURE_SECRET_KEY_CLIMATE_CREDIT_RISK_2026_PROD_DEMO"
 
 router = APIRouter(prefix="/api/v2/auth", tags=["Authentication & Access Control"])
 
@@ -23,11 +23,13 @@ def b64_url_decode(s: str) -> bytes:
     padding = "=" * ((4 - len(s) % 4) % 4)
     return base64.urlsafe_b64decode(s + padding)
 
-def hash_password(password: str, salt: str = "nabard_salt_2026") -> str:
+def hash_password(password: str, salt: str = "agrisure_salt_2026") -> str:
     return hashlib.pbkdf2_hmac("sha256", password.encode("utf-8"), salt.encode("utf-8"), 10000).hex()
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
-    return hmac.compare_digest(hash_password(plain_password), hashed_password)
+    if hmac.compare_digest(hash_password(plain_password, "agrisure_salt_2026"), hashed_password):
+        return True
+    return hmac.compare_digest(hash_password(plain_password, "nabard_salt_2026"), hashed_password)
 
 def create_access_token(payload: Dict[str, Any], expires_in: int = 86400) -> str:
     header = {"alg": "HS256", "typ": "JWT"}
@@ -169,7 +171,7 @@ class RegisterOfficerRequest(BaseModel):
     password: str
     full_name: str
     designation: Optional[str] = "Credit Officer"
-    branch: Optional[str] = "NABARD / Regional Rural Bank"
+    branch: Optional[str] = "AgriSure / Regional Rural Bank"
     invite_code: Optional[str] = None
 
 # Endpoints
@@ -267,7 +269,7 @@ def register_farmer(payload: RegisterFarmerRequest):
 @router.post("/register-officer")
 def register_officer(payload: RegisterOfficerRequest):
     """Registers a new Bank Officer account with administrative invite code verification."""
-    valid_invite_codes = ["OFFICER_2026_ADMIN", "NABARD_OFFICER_INVITE", "ADMIN_SECRET"]
+    valid_invite_codes = ["OFFICER_2026_ADMIN", "AGRISURE_OFFICER_INVITE", "NABARD_OFFICER_INVITE", "ADMIN_SECRET"]
     code = (payload.invite_code or "").strip().upper()
     if code not in valid_invite_codes:
         raise HTTPException(status_code=403, detail={
@@ -296,7 +298,7 @@ def register_officer(payload: RegisterOfficerRequest):
         "officer_id": officer_id,
         "full_name": payload.full_name.strip(),
         "designation": payload.designation.strip() if payload.designation else "Credit Officer",
-        "branch": payload.branch.strip() if payload.branch else "NABARD Regional Office"
+        "branch": payload.branch.strip() if payload.branch else "AgriSure Regional Office"
     }
 
     users.append(new_user)
@@ -432,7 +434,7 @@ def google_auth_callback(code: Optional[str] = Query(None), error: Optional[str]
 <html>
 <head>
     <meta charset="utf-8">
-    <title>Authenticating with NABARD System...</title>
+    <title>Authenticating with AgriSure System...</title>
     <style>
         body {{ font-family: system-ui, -apple-system, sans-serif; background: #0f172a; color: #f8fafc; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; }}
         .box {{ background: #1e293b; border: 1px solid #334155; border-radius: 12px; padding: 2.5rem; text-align: center; max-width: 420px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.5); }}
@@ -457,6 +459,7 @@ def google_auth_callback(code: Optional[str] = Query(None), error: Optional[str]
                 const raw = document.getElementById('auth-payload').textContent;
                 const data = JSON.parse(raw);
                 if (data && data.access_token) {{
+                    localStorage.setItem('AGRISURE_AUTH_SESSION', JSON.stringify(data));
                     localStorage.setItem('NABARD_AUTH_SESSION', JSON.stringify(data));
                 }}
             }} catch(e) {{

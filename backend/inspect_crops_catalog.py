@@ -222,7 +222,7 @@ def inspect_dataset(config):
     return result
 
 def main():
-    print("=== NABARD Agricultural Datasets Inspection & Cataloguing ===")
+    print("=== AgriSure Agricultural Datasets Inspection & Cataloguing ===")
     
     os.makedirs(os.path.dirname(OUTPUT_CATALOG_JSON), exist_ok=True)
     catalog = {
@@ -277,7 +277,7 @@ def main():
 
     # Save DATA_CATALOG.md
     md_lines = [
-        "# NABARD Agricultural Data Catalog",
+        "# AgriSure Agricultural Data Catalog",
         "",
         "## Summary Overview",
         f"- **Catalog Generated At**: `{catalog['generated_at']}`",

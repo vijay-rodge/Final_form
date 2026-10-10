@@ -1,4 +1,4 @@
-// NABARD Climate Credit Risk Assessment Controller
+// AgriSure Climate Credit Risk Assessment Controller
 // Controls Borrower Selection, Dataset Agronomic Integration, Risk Scoring, SHAP Explainability & Batch Evaluation
 
 document.addEventListener('DOMContentLoaded', () => {

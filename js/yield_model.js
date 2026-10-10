@@ -1,4 +1,4 @@
-// NABARD FIN-03 ML Crop Yield Predictor Engine
+// AgriSure FIN-03 ML Crop Yield Predictor Engine
 // Multi-Variable Regression & Decision Tree Ensemble trained on User Agricultural Dataset
 
 class MLYieldPredictor {

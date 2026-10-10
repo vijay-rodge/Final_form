@@ -1,5 +1,5 @@
 /**
- * NABARD FIN-03 Decoupled Satellite & NDVI Data Retrieval Module
+ * AgriSure FIN-03 Decoupled Satellite & NDVI Data Retrieval Module
  * 
  * IMPORTANT ARCHITECTURE NOTE ON SECURE CREDENTIAL CONFIGURATION:
  * -------------------------------------------------------------

@@ -1,4 +1,4 @@
-// NABARD FIN-03: Real Dataset & Model Constants derived from Agricultural Dataset
+// AgriSure FIN-03: Real Dataset & Model Constants derived from Agricultural Dataset
 // Features: Fertilizer (kg/ha), Temperature (°C), Nitrogen N (kg/ha), Phosphorus P (kg/ha), Potassium K (kg/ha) -> Yield (tonnes/ha or q/ha)
 
 const RAW_AGRICULTURAL_DATASET = [
@@ -73,7 +73,7 @@ const RAW_AGRICULTURAL_DATASET = [
   { fertilizer: 70.27, temp: 33.93, N: 74.00, P: 21.96, K: 16.07, yield: 10.01 }
 ];
 
-// District Preset Profiles across India for NABARD Portfolio
+// District Preset Profiles across India for AgriSure Portfolio
 const DISTRICT_PROFILES = [
   {
     id: "DIST_001",

@@ -19,7 +19,7 @@ class OpenMeteoWeatherConnector:
         """
         try:
             url = f"{self.base_url}?latitude={lat}&longitude={lng}&daily=temperature_2m_max,temperature_2m_min,precipitation_sum,soil_moisture_0_to_7cm_mean&timezone=auto"
-            req = urllib.request.Request(url, headers={"User-Agent": "NABARD-FIN03-Client/1.0"})
+            req = urllib.request.Request(url, headers={"User-Agent": "AgriSure-FIN03-Client/1.0"})
             with urllib.request.urlopen(req, timeout=3) as response:
                 data = json.loads(response.read().decode('utf-8'))
                 daily = data.get("daily", {})

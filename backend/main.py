@@ -1,5 +1,5 @@
 """
-NABARD Climate-Aware Credit Risk Application Backend Server
+AgriSure Climate-Aware Credit Risk Application Backend Server
 Exposes Phase 2 endpoints for real environmental telemetry: Open-Meteo Weather, Copernicus Sentinel-2 Satellite, and ISRIC SoilGrids.
 """
 
@@ -52,8 +52,8 @@ pdf_generator = PDFReportGenerator()
 
 if FASTAPI_AVAILABLE:
     app = FastAPI(
-        title="NABARD Climate Telemetry & Credit Risk API",
-        description="Phase 2 Real Environmental Telemetry API: Open-Meteo Weather, Copernicus Sentinel-2, & ISRIC SoilGrids.",
+        title="AgriSure Climate Telemetry & Credit Risk API",
+        description="AgriSure Real Environmental Telemetry API: Open-Meteo Weather, Copernicus Sentinel-2, & ISRIC SoilGrids.",
         version="2.0.0"
     )
 
@@ -88,7 +88,7 @@ if FASTAPI_AVAILABLE:
         if os.path.exists(index_path):
             return FileResponse(index_path)
         return {
-            "system": "NABARD Climate-Aware Credit Risk System API",
+            "system": "AgriSure Climate-Aware Credit Risk System API",
             "phase": "Phase 2 Environmental Telemetry Active",
             "version": "2.0.0"
         }
@@ -177,5 +177,5 @@ if FASTAPI_AVAILABLE:
 
 if __name__ == "__main__":
     import uvicorn
-    print("[NABARD Backend] Launching Phase 2 Telemetry Server on http://localhost:8000 ...")
+    print("[AgriSure Backend] Launching Phase 2 Telemetry Server on http://localhost:8000 ...")
     uvicorn.run(app, host="0.0.0.0", port=8000)

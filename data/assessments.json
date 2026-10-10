@@ -1,0 +1,191 @@
+[
+  {
+    "assessment_id": "ASSESS-20261010065050",
+    "farmer_id": "DEMO001",
+    "loan_id": "LOAN001",
+    "timestamp": "2026-10-10T06:50:50.141001",
+    "model_version": "v2.1-prototype-calibrated",
+    "overall_risk_classification": "Moderate",
+    "climate_risk_classification": "Low",
+    "financial_risk_classification": "Moderate",
+    "probability_model_status": "PROTOTYPE_RISK_SCORE",
+    "estimated_repayment_probability_pct": 68.2,
+    "borrower_details": {
+      "farmer_id": "DEMO001",
+      "applicant_name": "Farmer Borrower (DEMO001)",
+      "district": "Pune",
+      "state": "Maharashtra",
+      "crop_type": "Pulses",
+      "land_acres": 5.66,
+      "irrigation_type": "Mixed",
+      "loan_amount_inr": 182000.0,
+      "loan_term_months": 12,
+      "interest_rate_pct": 9.65
+    },
+    "agronomic_dataset_context": {
+      "crop": "Pulses",
+      "optimal_N": 40.0,
+      "optimal_P": 68.0,
+      "optimal_K": 80.0,
+      "recommended_ph": 6.9,
+      "water_requirement_liters_yr": 1200.0,
+      "benchmark_yield_tons_ha": 1.8,
+      "dataset_source": "Kaggle Crop Recommendation & Water Dataset (sakshi21122001)"
+    },
+    "telemetry_context": {
+      "latitude": 18.5204,
+      "longitude": 73.8567,
+      "rainfall_mm": 412.0,
+      "avg_temp_max_c": 29.8,
+      "heatwave_days": 0,
+      "soil_ph": 7.2,
+      "soil_texture": "Clay Loam"
+    },
+    "risk_assessment": {
+      "applicant_name": "Farmer Borrower (DEMO001)",
+      "farmer_id": "DEMO001",
+      "district": "Pune, Maharashtra",
+      "crop_type": "Pulses",
+      "land_acres": 5.66,
+      "loan_amount_inr": 182000,
+      "tenure_months": 12,
+      "interest_rate_pct": 9.65,
+      "irrigation_type": "Mixed",
+      "overall_risk_classification": "Moderate",
+      "climate_risk_classification": "Low",
+      "financial_risk_classification": "Moderate",
+      "climate_credit_score": 676,
+      "climate_risk_score_raw": 17.2,
+      "financial_risk_score_raw": 62.0,
+      "combined_risk_score": 37.4,
+      "probability_model_status": "PROTOTYPE_RISK_SCORE",
+      "calibration_label": "PROTOTYPE RISK SCORE (UNCALIBRATED)",
+      "estimated_repayment_probability_pct": 68.2,
+      "estimated_default_probability_pct": 31.8,
+      "loss_given_default_pct": 29.6,
+      "expected_loss_inr": 17148,
+      "gross_farm_revenue_inr": 496359,
+      "net_farm_revenue_inr": 272998,
+      "annual_debt_service_inr": 191653,
+      "dscr": 1.42,
+      "positive_factors": [
+        {
+          "factor": "Debt Service Coverage (DSCR)",
+          "category": "Financial Cashflow",
+          "value": "1.42x",
+          "impact": "Positive (+25 pts)",
+          "explanation": "Forecasted net farm income covers annual loan EMI by 1.42x."
+        },
+        {
+          "factor": "Monsoon Rainfall Anomaly",
+          "category": "Climate Exposure",
+          "value": "+3.0%",
+          "impact": "Positive (+15 pts)",
+          "explanation": "Monsoon rainfall is within normal seasonal agronomic parameters."
+        }
+      ],
+      "negative_factors": [
+        {
+          "factor": "Credit Score (CIBIL)",
+          "category": "Financial History",
+          "value": "650",
+          "impact": "High Negative (-45 pts)",
+          "explanation": "Below-average credit score indicates past credit delinquency or limited credit history."
+        },
+        {
+          "factor": "Irrigation Infrastructure",
+          "category": "Farm Infrastructure",
+          "value": "Rainfed",
+          "impact": "High Negative (-40 pts)",
+          "explanation": "Rainfed farming is highly exposed to monsoon delays, dry spells, and drought."
+        }
+      ],
+      "available_data": [
+        {
+          "field": "Farmer Profile & Identity",
+          "source": "synthetic_agricultural_loan_repayment_100_farmers.csv",
+          "status": "Verified"
+        },
+        {
+          "field": "Historical Repayment & CIBIL",
+          "source": "synthetic_agricultural_loan_repayment_100_farmers.csv",
+          "status": "Verified"
+        },
+        {
+          "field": "Weather & Rainfall Telemetry",
+          "source": "Open-Meteo Weather API / Cached Climatology",
+          "status": "Active Data Source"
+        },
+        {
+          "field": "Soil pH & Texture Profile",
+          "source": "ISRIC SoilGrids API / Regional Soil Taxonomy",
+          "status": "Active Data Source"
+        },
+        {
+          "field": "Agronomic Crop Benchmarks",
+          "source": "Kaggle 12 Agricultural Datasets Catalog (sakshi21122001 / UN-FAO)",
+          "status": "Cataloged Benchmarks"
+        }
+      ],
+      "missing_fields": [
+        "Live APMC Mandi Price API",
+        "market_apmc_live",
+        "Satellite Live NDVI Vegetation Stream",
+        "satellite_ndvi"
+      ],
+      "demo_data_badges": [
+        "Satellite NDVI: Simulated Demo Benchmark",
+        "APMC Price: Regional Mandi Average"
+      ],
+      "officer_next_steps": [
+        "Conduct a physical land verification inspection to verify sowing dates and water source availability."
+      ],
+      "plain_language_narrative": "Loan Application for Farmer Borrower (DEMO001) (Pulses on 5.66 acres in Pune, Maharashtra) has been evaluated with an Overall Risk Classification of MODERATE. Climate Risk is classified as LOW (score: 17.2/100) due to a rainfall deficit of 3.0% and Mixed irrigation conditions. Financial & Repayment Risk is classified as MODERATE (score: 62.0/100) based on a CIBIL score of 650 and a Debt Service Coverage Ratio of 1.42x. The output metric (68.2% estimated repayment score) is explicitly classified as a PROTOTYPE RISK SCORE pending further historical loss calibration. This assessment serves as decision support for the qualified bank officer.",
+      "model_version": "v2.1-prototype-calibrated",
+      "disclaimer": "This output is decision support for a qualified bank officer. It does not constitute automated approval or rejection."
+    },
+    "explainability": {
+      "shapValues": [
+        {
+          "feature": "CIBIL / Credit History",
+          "value": "650",
+          "impactPoints": -50,
+          "type": "negative",
+          "description": "Sub-optimal historical financial record."
+        },
+        {
+          "feature": "Temperature / Heat Stress",
+          "value": "29.8\u00b0C",
+          "impactPoints": 1,
+          "type": "positive",
+          "description": "Optimal temperature for crop growth."
+        },
+        {
+          "feature": "Monsoon Rainfall Anomaly",
+          "value": "+3.0%",
+          "impactPoints": 4,
+          "type": "positive",
+          "description": "Adequate monsoon rainfall coverage."
+        },
+        {
+          "feature": "Irrigation Infrastructure",
+          "value": "Mixed",
+          "impactPoints": -35,
+          "type": "negative",
+          "description": "Irrigation infrastructure buffers against heat & drought."
+        },
+        {
+          "feature": "Debt Service Coverage (DSCR)",
+          "value": "1.42x",
+          "impactPoints": 9,
+          "type": "positive",
+          "description": "Healthy cashflow margin to service loan EMI."
+        }
+      ],
+      "calculatedScore": 676,
+      "recommendations": [
+        "Conduct a physical land verification inspection to verify sowing dates and water source availability."
+      ]
+    }
+  }
+]

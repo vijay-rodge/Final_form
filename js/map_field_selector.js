@@ -1,5 +1,5 @@
 /**
- * NABARD FIN-03 Interactive Leaflet Field Selector & Polygon Capture Tool
+ * AgriSure FIN-03 Interactive Leaflet Field Selector & Polygon Capture Tool
  * 
  * Features:
  * - Uses OpenStreetMap tiles with standard required attribution.

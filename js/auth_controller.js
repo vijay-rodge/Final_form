@@ -1,6 +1,6 @@
-// NABARD Climate-Aware Credit Risk Assessment System — Authentication, Dashboard & Application Controller
+// AgriSure Climate-Aware Credit Risk Assessment System — Authentication, Dashboard & Application Controller
 
-const AUTH_STORAGE_KEY = 'NABARD_AUTH_SESSION';
+const AUTH_STORAGE_KEY = 'AGRISURE_AUTH_SESSION';
 const API_BASE_AUTH = (window.location.port === '8000') ? '' : 'http://localhost:8000';
 let currentUserSession = null;
 
@@ -15,7 +15,7 @@ document.addEventListener('DOMContentLoaded', () => {
  */
 function initAuthSession() {
   try {
-    const saved = localStorage.getItem(AUTH_STORAGE_KEY) || sessionStorage.getItem(AUTH_STORAGE_KEY);
+    const saved = localStorage.getItem(AUTH_STORAGE_KEY) || sessionStorage.getItem(AUTH_STORAGE_KEY) || localStorage.getItem('NABARD_AUTH_SESSION') || sessionStorage.getItem('NABARD_AUTH_SESSION');
     if (saved) {
       currentUserSession = JSON.parse(saved);
     }

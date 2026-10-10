@@ -1,4 +1,4 @@
-// NABARD Climate-Aware Credit Risk Assessment — Application Controller
+// AgriSure Climate-Aware Credit Risk Assessment — Application Controller
 // Handles Hash Routing, Navigation, Active States, and Mobile Menu Toggle
 
 document.addEventListener('DOMContentLoaded', () => {

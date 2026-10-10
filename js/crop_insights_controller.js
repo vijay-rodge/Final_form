@@ -1,4 +1,4 @@
-// NABARD Agricultural Datasets & Insights Controller
+// AgriSure Agricultural Datasets & Insights Controller
 // Controls Dataset Explorer, Table Viewer, Pagination, Filters, and Chart.js Agronomic Visualizations
 
 document.addEventListener('DOMContentLoaded', () => {

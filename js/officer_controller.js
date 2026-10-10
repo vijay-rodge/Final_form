@@ -1,4 +1,4 @@
-// NABARD Bank Officer Dashboard & Loan Review Controller
+// AgriSure Bank Officer Dashboard & Loan Review Controller
 // Handles Executive Metrics, Chart.js Risk Visualizations, Searchable Queue, 10-Section File Review, and Decision Audit Trail Logging
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -13,7 +13,7 @@ let currentLoadedAppId = null;
 
 function getOfficerAuthHeaders() {
   try {
-    const saved = localStorage.getItem('NABARD_AUTH_SESSION') || sessionStorage.getItem('NABARD_AUTH_SESSION');
+    const saved = localStorage.getItem('AGRISURE_AUTH_SESSION') || sessionStorage.getItem('AGRISURE_AUTH_SESSION') || localStorage.getItem('NABARD_AUTH_SESSION') || sessionStorage.getItem('NABARD_AUTH_SESSION');
     if (saved) {
       const sess = JSON.parse(saved);
       if (sess && sess.access_token) {

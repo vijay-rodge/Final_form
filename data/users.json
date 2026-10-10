@@ -35,7 +35,7 @@
     "role": "bank_officer",
     "officer_id": "OFFICER_001",
     "full_name": "Anil Deshmukh (Credit Officer)",
-    "branch": "NABARD Hubli-Dharwad Branch"
+    "branch": "AgriSure Hubli-Dharwad Branch"
   },
   {
     "username": "officer2",
@@ -43,6 +43,6 @@
     "role": "bank_officer",
     "officer_id": "OFFICER_002",
     "full_name": "Priya Singh (Regional Credit Manager)",
-    "branch": "NABARD State Headquarters"
+    "branch": "AgriSure State Headquarters"
   }
 ]

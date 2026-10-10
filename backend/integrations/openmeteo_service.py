@@ -62,7 +62,7 @@ class OpenMeteoWeatherService:
         try:
             req = urllib.request.Request(
                 full_url,
-                headers={"User-Agent": "NABARD-Climate-Risk-Engine/2.0"}
+                headers={"User-Agent": "AgriSure-Climate-Risk-Engine/2.0"}
             )
             with urllib.request.urlopen(req, timeout=8) as response:
                 payload = json.loads(response.read().decode('utf-8'))

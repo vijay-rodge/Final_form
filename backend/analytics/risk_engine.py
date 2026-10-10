@@ -1,5 +1,5 @@
 """
-NABARD FIN-03 Dual-Pillar Climate-Aware Credit Risk Engine
+AgriSure FIN-03 Dual-Pillar Climate-Aware Credit Risk Engine
 Evaluates Climate Risk Exposure & Financial Repayment Capacity independently,
 then synthesizes Overall Risk Classification (Low, Moderate, High), Factored Drivers,
 Data Provenance, and Officer Decision Support.

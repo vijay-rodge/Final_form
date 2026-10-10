@@ -1,5 +1,5 @@
 """
-NABARD Institutional PDF Risk Assessment Report Generator
+AgriSure Institutional PDF Risk Assessment Report Generator
 Generates printable PDF reports summarizing farm location, satellite NDVI, yield forecast, risk score, & SHAP drivers.
 """
 
@@ -30,8 +30,8 @@ class PDFReportGenerator:
                 textColor=colors.HexColor('#059669')
             )
 
-            story.append(Paragraph("NABARD Climate-Aware Credit Risk Assessment Report", title_style))
-            story.append(Paragraph("National Bank for Agriculture and Rural Development", styles['Normal']))
+            story.append(Paragraph("AgriSure Climate-Aware Credit Risk Assessment Report", title_style))
+            story.append(Paragraph("AgriSure — Agricultural Credit & Climate Intelligence", styles['Normal']))
             story.append(Spacer(1, 12))
 
             # Borrower Details Table
@@ -72,7 +72,7 @@ class PDFReportGenerator:
             story.append(Spacer(1, 14))
 
             # Recommendations
-            story.append(Paragraph("<b>NABARD Risk Mitigation Directives:</b>", styles['Heading3']))
+            story.append(Paragraph("<b>AgriSure Risk Mitigation Directives:</b>", styles['Heading3']))
             for rec in shap_result.get("recommendations", []):
                 story.append(Paragraph(f"• {rec}", styles['Normal']))
 
@@ -82,7 +82,7 @@ class PDFReportGenerator:
             print(f"[PDFGenerator] ReportLab build exception: {e}")
             # Fallback simple text report if reportlab is not installed
             with open(output_path, "w", encoding="utf-8") as f:
-                f.write(f"NABARD CLIMATE CREDIT RISK REPORT\n")
+                f.write(f"AGRISURE CLIMATE CREDIT RISK REPORT\n")
                 f.write(f"Applicant: {app_data.get('applicantName')}\n")
                 f.write(f"District: {app_data.get('district')}\n")
                 f.write(f"Climate Score: {risk_result.get('climateCreditScore')}\n")

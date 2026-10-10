@@ -1,4 +1,4 @@
-// NABARD FIN-03 SHAP-style Explainability & Risk Driver Attribution Engine
+// AgriSure FIN-03 SHAP-style Explainability & Risk Driver Attribution Engine
 
 class RiskExplainabilityEngine {
   /**
@@ -95,7 +95,7 @@ class RiskExplainabilityEngine {
       description: riskResult.dscr >= 1.25 ? "Comfortable cashflow margin to service loan EMI." : "Tight farm revenue margin to service debt."
     });
 
-    // Actionable Recommendations for NABARD Credit Officers & Farmers
+    // Actionable Recommendations for AgriSure Credit Officers & Farmers
     const recommendations = [];
     if (inputs.irrigationType === 'Rainfed') {
       recommendations.push("🌱 **Mitigation Alert**: Grant 30% top-up loan micro-subsidy for installing Solar Drip Irrigation, which will boost credit rating score by +65 pts.");

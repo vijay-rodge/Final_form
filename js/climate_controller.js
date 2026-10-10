@@ -1,4 +1,4 @@
-// NABARD Climate-Aware Credit Risk System — Phase 2 Climate Telemetry Controller (Audited)
+// AgriSure Climate-Aware Credit Risk System — Phase 2 Climate Telemetry Controller (Audited)
 // Strict location propagation, real API parsing, per-source status management, and zero data fabrication.
 
 const DISTRICT_PRESETS = [

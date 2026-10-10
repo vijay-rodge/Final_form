@@ -120,7 +120,7 @@ def copy_dataset_files(src_dir, dest_dir):
     return copied_files, skipped_files
 
 def run_download_pipeline():
-    print(f"=== NABARD Agricultural Datasets Downloader ===")
+    print(f"=== AgriSure Agricultural Datasets Downloader ===")
     print(f"Target Base Path: {TARGET_BASE_DIR}\n")
     ensure_directory(TARGET_BASE_DIR)
 
