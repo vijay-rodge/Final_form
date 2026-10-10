@@ -45,9 +45,6 @@
       <a href="#/risk" class="nav-tab" data-route="risk" role="tab" id="tab-link-risk" aria-selected="false" aria-controls="tab-risk">
         <i data-lucide="shield-alert"></i> Risk Assessment
       </a>
-      <a href="#/officer" class="nav-tab" data-route="officer" role="tab" id="tab-link-officer" aria-selected="false" aria-controls="tab-officer" style="display: none;">
-        <i data-lucide="building"></i> Officer Portal
-      </a>
     </nav>
 
     <!-- Auth Profile / Login Button Container -->
@@ -218,6 +215,42 @@
                 <i data-lucide="loader-2" class="spin"></i> Loading farmer loan applications...
               </div>
             </div>
+          </div>
+
+          <!-- Section: Borrower Loan Application Selection Desk for Bank Officers -->
+          <div class="card" style="margin-top: 1.5rem; background: linear-gradient(135deg, #ffffff 0%, #f0fdf4 100%); border: 1px solid #0d9488;">
+            <div class="card-header" style="border-bottom: 1px solid #ccfbf1;">
+              <h3 class="card-title" style="color: #0f766e;"><i data-lucide="user-check"></i> Borrower Loan Application to Evaluate</h3>
+              <span class="badge badge-teal">100 Borrower Portfolio Dataset Active</span>
+            </div>
+
+            <div class="grid-2col" style="margin-bottom: 0.5rem; align-items: flex-end;">
+              <div class="form-group" style="margin-bottom: 0;">
+                <label for="riskBorrowerSelect" style="font-weight: 700; color: var(--text-main);">Select Borrower Application Record to Evaluate</label>
+                <select id="riskBorrowerSelect" class="form-control" style="background: #ffffff;">
+                  <option value="DEMO001">DEMO001 — Pune, Maharashtra | Pulses (₹182,000)</option>
+                </select>
+              </div>
+
+              <div style="display: flex; gap: 1rem; align-items: flex-end;">
+                <button id="btnRunRiskAssessment" class="btn-primary" style="flex: 1; padding: 10px 16px; background: linear-gradient(135deg, #0d9488 0%, #06b6d4 100%); border: none;">
+                  <i data-lucide="shield-check"></i> Evaluate Credit Risk
+                </button>
+                <button id="btnEvaluateBatchPortfolio" class="btn-secondary" style="flex: 1; padding: 10px 16px;">
+                  <i data-lucide="layers"></i> Evaluate Entire Portfolio (100 Borrowers)
+                </button>
+              </div>
+            </div>
+
+            <!-- Hidden inputs mapped dynamically from borrower choice -->
+            <input type="hidden" id="riskDistrict" value="Dharwad">
+            <input type="hidden" id="riskState" value="Karnataka">
+            <input type="hidden" id="riskCrop" value="Cotton">
+            <input type="hidden" id="riskAcres" value="5.0">
+            <input type="hidden" id="riskLoanAmount" value="200000">
+            <input type="hidden" id="riskLoanTerm" value="12">
+            <input type="hidden" id="riskInterestRate" value="8.5">
+            <input type="hidden" id="riskIrrigation" value="Rainfed">
           </div>
         </div>
       </div>
@@ -936,8 +969,29 @@
         </div>
       </div>
 
-      <!-- Borrower Selection & Risk Control Card -->
-      <div class="card">
+      <!-- Active Evaluation Target Banner Card -->
+      <div id="riskActiveEvaluationBar" class="card" style="margin-bottom: 1.5rem; padding: 1.1rem 1.35rem; background: linear-gradient(135deg, #ffffff 0%, #f0fdf4 100%); border: 1px solid #99f6e4;">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <div style="width: 42px; height: 42px; background: #0d9488; color: #ffffff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.2rem;">
+              <i data-lucide="shield-check"></i>
+            </div>
+            <div>
+              <div style="font-size: 0.75rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase;">ACTIVE EVALUATION TARGET</div>
+              <div style="font-size: 1.1rem; font-weight: 800; color: #0f766e;" id="riskEvaluatedTargetLabel">Borrower Application Record: DEMO001 (Pune, Maharashtra)</div>
+            </div>
+          </div>
+          
+          <div id="officerChangeBorrowerBtnContainer" style="display: none;">
+            <a href="#/dashboard" class="btn-secondary" style="font-size: 0.85rem; padding: 7px 16px; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; font-weight: 700;">
+              <i data-lucide="arrow-left"></i> Change Borrower (Dashboard Desk)
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Borrower Selection & Risk Control Card for Bank Officers -->
+      <div id="riskOfficerBorrowerSelectCard" class="card" style="display: none; margin-bottom: 1.5rem;">
         <div class="card-header">
           <h3 class="card-title"><i data-lucide="user-check"></i> Select Borrower Loan Application to Evaluate</h3>
           <span class="badge badge-teal">100 Borrower Dataset Active</span>
@@ -945,31 +999,21 @@
 
         <div class="grid-2col" style="margin-bottom: 1.25rem;">
           <div class="form-group" style="margin-bottom: 0;">
-            <label for="riskBorrowerSelect">Borrower Application Record</label>
-            <select id="riskBorrowerSelect" class="form-control">
+            <label for="riskBorrowerSelectPage">Borrower Application Record</label>
+            <select id="riskBorrowerSelectPage" class="form-control">
               <option value="DEMO001">DEMO001 — Pune, Maharashtra | Pulses (₹182,000)</option>
             </select>
           </div>
 
           <div style="display: flex; gap: 1rem; align-items: flex-end;">
-            <button id="btnRunRiskAssessment" class="btn-primary" style="flex: 1; padding: 10px 16px;">
+            <button id="btnRunRiskAssessmentPage" class="btn-primary" style="flex: 1; padding: 10px 16px;">
               <i data-lucide="shield-check"></i> Evaluate Credit Risk
             </button>
-            <button id="btnEvaluateBatchPortfolio" class="btn-secondary" style="flex: 1; padding: 10px 16px;">
+            <button id="btnEvaluateBatchPortfolioPage" class="btn-secondary" style="flex: 1; padding: 10px 16px;">
               <i data-lucide="layers"></i> Evaluate Entire Portfolio (100 Borrowers)
             </button>
           </div>
         </div>
-
-        <!-- Hidden inputs mapped dynamically from borrower choice -->
-        <input type="hidden" id="riskDistrict" value="Dharwad">
-        <input type="hidden" id="riskState" value="Karnataka">
-        <input type="hidden" id="riskCrop" value="Cotton">
-        <input type="hidden" id="riskAcres" value="5.0">
-        <input type="hidden" id="riskLoanAmount" value="200000">
-        <input type="hidden" id="riskLoanTerm" value="12">
-        <input type="hidden" id="riskInterestRate" value="8.5">
-        <input type="hidden" id="riskIrrigation" value="Rainfed">
       </div>
 
       <!-- DUAL-PILLAR RISK CLASSIFICATION & CALIBRATION HEADER CARD -->
@@ -1124,7 +1168,7 @@
       </div>
 
       <!-- Record Bank Officer Lending Decision Card -->
-      <div class="card" style="margin-bottom: 1.5rem; border: 1px solid #0d9488; background: #f0fdf4;">
+      <div id="riskOfficerDecisionCard" class="card" style="margin-bottom: 1.5rem; border: 1px solid #0d9488; background: #f0fdf4;">
         <div class="card-header" style="border-bottom: 1px solid #ccfbf1;">
           <h3 class="card-title" style="color: #0f766e;"><i data-lucide="check-square"></i> Record Official Bank Officer Lending Decision</h3>
           <span class="badge badge-teal">Bank Officer Action</span>
@@ -1164,7 +1208,7 @@
       </div>
 
       <!-- Batch Portfolio Risk Assessment Card -->
-      <div class="card">
+      <div id="riskBatchPortfolioCard" class="card">
         <div class="card-header">
           <h3 class="card-title"><i data-lucide="layers"></i> Portfolio-Wide Risk Assessment (100 Borrower Dataset)</h3>
           <span class="badge badge-slate">Batch Risk Evaluation</span>
@@ -1172,9 +1216,30 @@
 
         <div id="batchPortfolioSummaryBox" style="margin-bottom: 1rem;"></div>
 
-        <div style="overflow-x: auto; border: 1px solid var(--border-subtle); border-radius: var(--radius-sm);">
+        <!-- Search & Pagination Controls -->
+        <div class="grid-2col" style="margin-bottom: 1rem; align-items: center;">
+          <div class="form-group" style="margin-bottom: 0;">
+            <input type="text" id="batchRiskSearchInput" class="form-control" placeholder="Search 100 borrowers by Farmer ID, District, Crop, or Risk Decision...">
+          </div>
+          <div style="display: flex; justify-content: flex-end; align-items: center; gap: 10px; flex-wrap: wrap;">
+            <span id="batchRiskPageIndicator" style="font-size: 0.85rem; color: var(--text-muted); font-weight: 600;">Showing 0 of 100 Borrowers</span>
+            <div style="display: flex; gap: 6px;">
+              <button id="btnBatchPrevPage" class="btn-secondary" style="padding: 5px 12px; font-size: 0.82rem;">
+                <i data-lucide="chevron-left"></i> Prev
+              </button>
+              <button id="btnBatchNextPage" class="btn-secondary" style="padding: 5px 12px; font-size: 0.82rem;">
+                Next <i data-lucide="chevron-right"></i>
+              </button>
+              <button id="btnBatchToggleAll" class="btn-secondary" style="padding: 5px 12px; font-size: 0.82rem; background: #e0f2fe; color: #0369a1; border-color: #bae6fd;">
+                Show All 100 Rows
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div style="overflow-x: auto; max-height: 550px; border: 1px solid var(--border-subtle); border-radius: var(--radius-sm);">
           <table class="data-table" style="width: 100%; border-collapse: collapse;">
-            <thead>
+            <thead style="position: sticky; top: 0; z-index: 2;">
               <tr>
                 <th style="padding: 10px 14px; background: #f8fafc; text-align: left;">Farmer ID</th>
                 <th style="padding: 10px 14px; background: #f8fafc; text-align: left;">District</th>

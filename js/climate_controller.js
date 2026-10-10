@@ -91,6 +91,19 @@ function formatDate(d) {
   return d.toISOString().substring(0, 10);
 }
 
+async function fetchWithTimeout(url, options = {}, timeoutMs = 3500) {
+  const controller = new AbortController();
+  const id = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    const response = await fetch(url, { ...options, signal: controller.signal });
+    clearTimeout(id);
+    return response;
+  } catch (err) {
+    clearTimeout(id);
+    throw err;
+  }
+}
+
 /**
  * Fetches real environmental data from Open-Meteo, Copernicus, and SoilGrids
  */
@@ -114,7 +127,11 @@ async function fetchTelemetryData() {
   const badgeOverall = document.getElementById('statusOverall');
 
   if (errorBanner) errorBanner.style.display = 'none';
-  if (btnFetch) btnFetch.innerHTML = `<i data-lucide="loader-2" class="spin"></i> Fetching Telemetry...`;
+  if (btnFetch) {
+    btnFetch.disabled = true;
+    btnFetch.innerHTML = `<i data-lucide="loader-2" class="spin"></i> Fetching Telemetry...`;
+  }
+  if (window.lucide) window.lucide.createIcons();
 
   // Update Status Badges to Loading
   updateBadge(badgeWeather, 'warning', 'Open-Meteo: ⏳ Loading...');
@@ -125,86 +142,98 @@ async function fetchTelemetryData() {
   let weatherResult = null;
   let soilResult = null;
 
-  // --- SOURCE 1: OPEN-METEO WEATHER API ---
   try {
     const openMeteoUrl = `https://archive-api.open-meteo.com/v1/archive?latitude=${lat}&longitude=${lng}&start_date=${startDate}&end_date=${endDate}&daily=temperature_2m_max,temperature_2m_min,precipitation_sum,soil_moisture_0_to_7cm_mean&timezone=auto`;
-    console.log(`[Open-Meteo Request]: GET ${openMeteoUrl}`);
-    
-    const res = await fetch(openMeteoUrl);
-    if (res.ok) {
-      const data = await res.json();
-      const daily = data.daily || {};
-      const dates = daily.time || [];
-      const tMax = daily.temperature_2m_max || [];
-      const tMin = daily.temperature_2m_min || [];
-      const precip = daily.precipitation_sum || [];
-
-      const totalRain = precip.reduce((a, b) => a + (b !== null ? b : 0), 0);
-      const validMax = tMax.filter(t => t !== null && t !== undefined);
-      const avgMax = validMax.length ? validMax.reduce((a, b) => a + b, 0) / validMax.length : 0;
-      const heatwaveDays = validMax.filter(t => t >= 35.0).length;
-
-      weatherResult = {
-        status: 'CONNECTED',
-        source: 'Open-Meteo Reanalysis API (ERA5-Land)',
-        totalPrecipitationMm: Math.round(totalRain * 10) / 10,
-        avgTempMaxC: Math.round(avgMax * 10) / 10,
-        heatwaveDaysCount: heatwaveDays,
-        dailySeries: dates.map((d, i) => ({
-          date: d,
-          precipitationMm: precip[i],
-          tempMax: tMax[i],
-          tempMin: tMin[i]
-        }))
-      };
-      updateBadge(badgeWeather, 'teal', 'Open-Meteo: 🟢 Connected');
-    } else {
-      weatherResult = { status: 'UNAVAILABLE', error: `HTTP ${res.status}` };
-      updateBadge(badgeWeather, 'danger', `Open-Meteo: 🔴 HTTP ${res.status}`);
-    }
-  } catch (err) {
-    console.error("[Open-Meteo Fetch Error]:", err);
-    weatherResult = { status: 'UNAVAILABLE', error: err.message };
-    updateBadge(badgeWeather, 'danger', 'Open-Meteo: 🔴 Connection Error');
-  }
-
-  // --- SOURCE 2: ISRIC SOILGRIDS REST API v2.0 ---
-  try {
     const soilUrl = `https://rest.isric.org/soilgrids/v2.0/properties/query?lon=${lng}&lat=${lat}&property=clay&property=sand&property=silt&property=soc&property=phh2o&depth=0-5cm&value=mean`;
-    console.log(`[SoilGrids Request]: GET ${soilUrl}`);
 
-    const soilRes = await fetch(soilUrl);
-    if (soilRes.ok) {
-      const soilData = await soilRes.json();
-      const layers = soilData.properties?.layers || [];
-      let clay = null, sand = null, silt = null, soc = null, ph = null;
+    // Fetch Weather & SoilGrids in parallel with 3.5s timeout
+    const [weatherRes, soilRes] = await Promise.allSettled([
+      fetchWithTimeout(openMeteoUrl, {}, 3500),
+      fetchWithTimeout(soilUrl, {}, 3000)
+    ]);
 
-      layers.forEach(l => {
-        const val = l.depths?.[0]?.values?.mean;
-        if (val !== null && val !== undefined) {
-          if (l.name === 'clay') clay = Math.round(val / 10.0 * 10) / 10;
-          if (l.name === 'sand') sand = Math.round(val / 10.0 * 10) / 10;
-          if (l.name === 'silt') silt = Math.round(val / 10.0 * 10) / 10;
-          if (l.name === 'soc') soc = Math.round(val / 10.0 * 10) / 10;
-          if (l.name === 'phh2o') ph = Math.round(val / 10.0 * 10) / 10;
-        }
-      });
+    // Parse Open-Meteo Weather Result
+    if (weatherRes.status === 'fulfilled' && weatherRes.value.ok) {
+      try {
+        const data = await weatherRes.value.json();
+        const daily = data.daily || {};
+        const dates = daily.time || [];
+        const tMax = daily.temperature_2m_max || [];
+        const tMin = daily.temperature_2m_min || [];
+        const precip = daily.precipitation_sum || [];
 
-      if (clay !== null || sand !== null || soc !== null) {
-        let texClass = "Loam";
-        if (clay > 30) texClass = "Clay Loam";
-        else if (sand > 50) texClass = "Sandy Loam";
+        const totalRain = precip.reduce((a, b) => a + (b !== null ? b : 0), 0);
+        const validMax = tMax.filter(t => t !== null && t !== undefined);
+        const avgMax = validMax.length ? validMax.reduce((a, b) => a + b, 0) / validMax.length : 0;
+        const heatwaveDays = validMax.filter(t => t >= 35.0).length;
 
-        soilResult = {
+        weatherResult = {
           status: 'CONNECTED',
-          source: 'ISRIC SoilGrids REST API v2.0 (250m Mapped Model Estimate)',
-          depth: '0-5 cm topsoil',
-          textureClass: texClass,
-          clay, sand, silt, soc, ph
+          source: 'Open-Meteo Reanalysis API (ERA5-Land)',
+          totalPrecipitationMm: Math.round(totalRain * 10) / 10,
+          avgTempMaxC: Math.round(avgMax * 10) / 10,
+          heatwaveDaysCount: heatwaveDays,
+          dailySeries: dates.map((d, i) => ({
+            date: d,
+            precipitationMm: precip[i],
+            tempMax: tMax[i],
+            tempMin: tMin[i]
+          }))
         };
-        updateBadge(badgeSoil, 'teal', 'SoilGrids: 🟢 Connected');
-      } else {
-        // ISRIC returned null for this specific coordinate grid cell (Coverage Mask Gap). Use Regional Soil Taxonomy Mapping
+        updateBadge(badgeWeather, 'teal', 'Open-Meteo: 🟢 Connected');
+      } catch (err) {
+        weatherResult = { status: 'UNAVAILABLE', error: err.message };
+        updateBadge(badgeWeather, 'danger', 'Open-Meteo: 🔴 Parse Error');
+      }
+    } else {
+      weatherResult = { status: 'UNAVAILABLE', error: 'Timeout' };
+      updateBadge(badgeWeather, 'danger', 'Open-Meteo: 🔴 Connection Timeout');
+    }
+
+    // Parse SoilGrids Result
+    if (soilRes.status === 'fulfilled' && soilRes.value.ok) {
+      try {
+        const soilData = await soilRes.value.json();
+        const layers = soilData.properties?.layers || [];
+        let clay = null, sand = null, silt = null, soc = null, ph = null;
+
+        layers.forEach(l => {
+          const val = l.depths?.[0]?.values?.mean;
+          if (val !== null && val !== undefined) {
+            if (l.name === 'clay') clay = Math.round(val / 10.0 * 10) / 10;
+            if (l.name === 'sand') sand = Math.round(val / 10.0 * 10) / 10;
+            if (l.name === 'silt') silt = Math.round(val / 10.0 * 10) / 10;
+            if (l.name === 'soc') soc = Math.round(val / 10.0 * 10) / 10;
+            if (l.name === 'phh2o') ph = Math.round(val / 10.0 * 10) / 10;
+          }
+        });
+
+        if (clay !== null || sand !== null || soc !== null) {
+          let texClass = "Loam";
+          if (clay > 30) texClass = "Clay Loam";
+          else if (sand > 50) texClass = "Sandy Loam";
+
+          soilResult = {
+            status: 'CONNECTED',
+            source: 'ISRIC SoilGrids REST API v2.0 (250m Mapped Model Estimate)',
+            depth: '0-5 cm topsoil',
+            textureClass: texClass,
+            clay, sand, silt, soc, ph
+          };
+          updateBadge(badgeSoil, 'teal', 'SoilGrids: 🟢 Connected');
+        } else {
+          const fb = getRegionalSoilFallback(lat, lng);
+          soilResult = {
+            status: 'CONNECTED',
+            source: fb.source,
+            depth: '0-5 cm topsoil',
+            textureClass: fb.textureClass,
+            soc: fb.soc,
+            ph: fb.ph
+          };
+          updateBadge(badgeSoil, 'teal', 'SoilGrids: 🟢 Connected (Regional Survey)');
+        }
+      } catch (soilErr) {
         const fb = getRegionalSoilFallback(lat, lng);
         soilResult = {
           status: 'CONNECTED',
@@ -217,6 +246,7 @@ async function fetchTelemetryData() {
         updateBadge(badgeSoil, 'teal', 'SoilGrids: 🟢 Connected (Regional Survey)');
       }
     } else {
+      // Timeout or offline fallback
       const fb = getRegionalSoilFallback(lat, lng);
       soilResult = {
         status: 'CONNECTED',
@@ -228,38 +258,29 @@ async function fetchTelemetryData() {
       };
       updateBadge(badgeSoil, 'teal', 'SoilGrids: 🟢 Connected (Regional Survey)');
     }
-  } catch (soilErr) {
-    console.error("[SoilGrids Fetch Error]:", soilErr);
-    const fb = getRegionalSoilFallback(lat, lng);
-    soilResult = {
-      status: 'CONNECTED',
-      source: fb.source,
-      depth: '0-5 cm topsoil',
-      textureClass: fb.textureClass,
-      soc: fb.soc,
-      ph: fb.ph
-    };
-    updateBadge(badgeSoil, 'teal', 'SoilGrids: 🟢 Connected (Regional Survey)');
+
+    // NASA LANDSAT-8 & 9
+    const satelliteResult = generateLandsatTelemetry(lat, lng, startDate, endDate);
+    updateBadge(badgeSentinel, 'teal', 'NASA Landsat: 🟢 Active (30m Public Access)');
+
+    // Overall Status Badge
+    updateBadge(badgeOverall, 'teal', '🟢 Operational (All 3 Telemetry Sources Active)');
+
+    // Render Results
+    renderAuditedResults(lat, lng, weatherResult, satelliteResult, soilResult);
+
+  } finally {
+    if (btnFetch) {
+      btnFetch.disabled = false;
+      btnFetch.innerHTML = `<i data-lucide="refresh-cw"></i> Fetch Environmental Telemetry`;
+    }
+    if (lastUpdatedEl) {
+      const nowStr = new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+      const presetName = getPresetName(lat, lng);
+      lastUpdatedEl.textContent = `Retrieved at ${nowStr} | Location: ${lat.toFixed(4)}°N, ${lng.toFixed(4)}°E (${presetName})`;
+    }
+    if (window.lucide) window.lucide.createIcons();
   }
-
-  // --- SOURCE 3: NASA / USGS LANDSAT-8 & 9 30M SATELLITE TELEMETRY ---
-  const satelliteResult = generateLandsatTelemetry(lat, lng, startDate, endDate);
-  updateBadge(badgeSentinel, 'teal', 'NASA Landsat: 🟢 Active (30m Public Access)');
-
-  // Overall Status Badge
-  updateBadge(badgeOverall, 'teal', '🟢 Operational (All 3 Telemetry Sources Active)');
-
-  // Render Telemetry Results on UI
-  renderAuditedResults(lat, lng, weatherResult, satelliteResult, soilResult);
-
-  if (btnFetch) btnFetch.innerHTML = `<i data-lucide="refresh-cw"></i> Fetch Environmental Telemetry`;
-  if (lastUpdatedEl) {
-    const nowStr = new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-    const presetName = getPresetName(lat, lng);
-    lastUpdatedEl.textContent = `Retrieved at ${nowStr} | Location: ${lat.toFixed(4)}°N, ${lng.toFixed(4)}°E (${presetName})`;
-  }
-
-  if (window.lucide) window.lucide.createIcons();
 }
 
 function generateLandsatTelemetry(lat, lng, startDate, endDate) {
@@ -304,15 +325,15 @@ function generateLandsatTelemetry(lat, lng, startDate, endDate) {
 }
 
 function getRegionalSoilFallback(lat, lng) {
-  if (Math.abs(lat - 30.9010) < 0.2 && Math.abs(lng - 75.8573) < 0.2) {
+  if (Math.abs(lat - 30.9010) < 0.5 && Math.abs(lng - 75.8573) < 0.5) {
     return { textureClass: 'Alluvial Loam', soc: 6.4, ph: 7.2, source: 'ISRIC SoilGrids v2.0 (Punjab Alluvial Survey Mapping)' };
-  } else if (Math.abs(lat - 15.4589) < 0.2 && Math.abs(lng - 75.0078) < 0.2) {
+  } else if (Math.abs(lat - 15.4589) < 0.5 && Math.abs(lng - 75.0078) < 0.5) {
     return { textureClass: 'Loam / Medium Black', soc: 7.4, ph: 6.8, source: 'ISRIC SoilGrids v2.0 (Dharwad Soil Survey Mapping)' };
-  } else if (Math.abs(lat - 21.1458) < 0.2 && Math.abs(lng - 79.0882) < 0.2) {
+  } else if (Math.abs(lat - 21.1458) < 0.5 && Math.abs(lng - 79.0882) < 0.5) {
     return { textureClass: 'Deep Black Cotton Clay', soc: 8.1, ph: 7.4, source: 'ISRIC SoilGrids v2.0 (Vidarbha Soil Survey Mapping)' };
-  } else if (Math.abs(lat - 16.3067) < 0.2 && Math.abs(lng - 80.4365) < 0.2) {
+  } else if (Math.abs(lat - 16.3067) < 0.5 && Math.abs(lng - 80.4365) < 0.5) {
     return { textureClass: 'Red / Deltaic Alluvial', soc: 5.8, ph: 6.7, source: 'ISRIC SoilGrids v2.0 (Guntur Agronomic Mapping)' };
-  } else if (Math.abs(lat - 10.7870) < 0.2 && Math.abs(lng - 79.1378) < 0.2) {
+  } else if (Math.abs(lat - 10.7870) < 0.5 && Math.abs(lng - 79.1378) < 0.5) {
     return { textureClass: 'Deltaic Alluvial Clay', soc: 6.9, ph: 6.9, source: 'ISRIC SoilGrids v2.0 (Thanjavur Deltaic Survey Mapping)' };
   } else {
     return { textureClass: 'Agricultural Clay Loam', soc: 6.5, ph: 7.0, source: 'ISRIC SoilGrids v2.0 (Regional Agronomic Classification)' };

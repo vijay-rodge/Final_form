@@ -43,7 +43,6 @@ function getAuthHeaders() {
  */
 function updateNavbarAuthUI() {
   const container = document.getElementById('navAuthContainer');
-  const officerTab = document.getElementById('tab-link-officer');
   if (!container) return;
 
   if (currentUserSession && currentUserSession.user) {
@@ -51,8 +50,6 @@ function updateNavbarAuthUI() {
     const isOfficer = user.role === 'bank_officer';
     const roleBadgeClass = isOfficer ? 'badge-teal' : 'badge-cyan';
     const roleLabel = isOfficer ? '🏦 Bank Officer' : `🌾 Farmer (${user.farmer_id || 'ID'})`;
-
-    if (officerTab) officerTab.style.display = isOfficer ? 'inline-flex' : 'none';
 
     container.innerHTML = `
       <div style="display: flex; align-items: center; gap: 10px;">
@@ -68,8 +65,6 @@ function updateNavbarAuthUI() {
 
     document.getElementById('btnLogout')?.addEventListener('click', handleLogout);
   } else {
-    if (officerTab) officerTab.style.display = 'none';
-
     container.innerHTML = `
       <a href="#/login" class="btn-primary" style="padding: 6px 14px; font-size: 0.85rem; text-decoration: none; display: inline-flex; align-items: center; gap: 6px;">
         <i data-lucide="user"></i> Login / Register

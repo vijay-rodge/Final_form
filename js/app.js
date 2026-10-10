@@ -94,6 +94,8 @@ function handleRouting() {
     } else if (window.prefillLoanApplicationForm) {
       window.prefillLoanApplicationForm();
     }
+  } else if (routeName === 'risk') {
+    if (window.updateRiskRoleVisibility) window.updateRiskRoleVisibility();
   } else if (routeName === 'officer' && window.loadOfficerPortalData) {
     window.loadOfficerPortalData();
   } else if (isAuthRoute && window.initAuthPageRoute) {

@@ -12,49 +12,79 @@ let shapChartInstance = null;
 
 function initRiskUI() {
   const borrowerSelect = document.getElementById('riskBorrowerSelect');
+  const borrowerSelectPage = document.getElementById('riskBorrowerSelectPage');
   const btnAssess = document.getElementById('btnRunRiskAssessment');
+  const btnAssessPage = document.getElementById('btnRunRiskAssessmentPage');
   const btnBatch = document.getElementById('btnEvaluateBatchPortfolio');
+  const btnBatchPage = document.getElementById('btnEvaluateBatchPortfolioPage');
+
+  const onSelectChange = (val) => {
+    if (borrowerSelect) borrowerSelect.value = val;
+    if (borrowerSelectPage) borrowerSelectPage.value = val;
+    populateFormFromBorrower(val);
+    runRiskAssessment();
+    updateRiskRoleVisibility();
+  };
 
   if (borrowerSelect) {
-    borrowerSelect.addEventListener('change', (e) => {
-      populateFormFromBorrower(e.target.value);
-      runRiskAssessment();
-    });
+    borrowerSelect.addEventListener('change', (e) => onSelectChange(e.target.value));
+  }
+  if (borrowerSelectPage) {
+    borrowerSelectPage.addEventListener('change', (e) => onSelectChange(e.target.value));
   }
 
-  if (btnAssess) {
-    btnAssess.addEventListener('click', () => {
-      runRiskAssessment();
-    });
-  }
+  const handleAssessClick = () => {
+    runRiskAssessment();
+    window.location.hash = '#/risk';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
 
-  if (btnBatch) {
-    btnBatch.addEventListener('click', () => {
-      runBatchPortfolioEvaluation();
-    });
-  }
+  if (btnAssess) btnAssess.addEventListener('click', handleAssessClick);
+  if (btnAssessPage) btnAssessPage.addEventListener('click', handleAssessClick);
 
-  // Load borrowers list
+  const handleBatchClick = () => {
+    runBatchPortfolioEvaluation();
+    window.location.hash = '#/risk';
+    setTimeout(() => {
+      const batchEl = document.getElementById('riskBatchPortfolioCard');
+      if (batchEl) batchEl.scrollIntoView({ behavior: 'smooth' });
+    }, 200);
+  };
+
+  if (btnBatch) btnBatch.addEventListener('click', handleBatchClick);
+  if (btnBatchPage) btnBatchPage.addEventListener('click', handleBatchClick);
+
   fetchBorrowersList();
+  updateRiskRoleVisibility();
+}
+
+function populateSelectsWithBorrowers(list) {
+  const selects = [
+    document.getElementById('riskBorrowerSelect'),
+    document.getElementById('riskBorrowerSelectPage')
+  ];
+
+  selects.forEach(select => {
+    if (!select) return;
+    const currentVal = select.value;
+    select.innerHTML = '';
+    list.forEach(b => {
+      const opt = document.createElement('option');
+      opt.value = b.farmer_id;
+      opt.textContent = `${b.farmer_id} — ${b.district}, ${b.state} | ${b.crop_type} (₹${parseInt(b.loan_amount_inr).toLocaleString()})`;
+      select.appendChild(opt);
+    });
+    if (currentVal) select.value = currentVal;
+  });
 }
 
 async function fetchBorrowersList() {
-  const borrowerSelect = document.getElementById('riskBorrowerSelect');
-  if (!borrowerSelect) return;
-
   try {
     const res = await fetch(`${API_BASE_RISK}/api/v2/risk/borrowers`);
     if (res.ok) {
       const data = await res.json();
       currentBorrowersList = data.data || [];
-      
-      borrowerSelect.innerHTML = '';
-      currentBorrowersList.forEach(b => {
-        const opt = document.createElement('option');
-        opt.value = b.farmer_id;
-        opt.textContent = `${b.farmer_id} — ${b.district}, ${b.state} | ${b.crop_type} (₹${parseInt(b.loan_amount_inr).toLocaleString()})`;
-        borrowerSelect.appendChild(opt);
-      });
+      populateSelectsWithBorrowers(currentBorrowersList);
 
       if (currentBorrowersList.length > 0) {
         populateFormFromBorrower(currentBorrowersList[0].farmer_id);
@@ -66,14 +96,10 @@ async function fetchBorrowersList() {
     console.warn('[RiskService] Could not fetch borrowers live, using static fallback list:', err);
   }
 
-  // Fallback static list if API unavailable
   populateFallbackBorrowers();
 }
 
 function populateFallbackBorrowers() {
-  const borrowerSelect = document.getElementById('riskBorrowerSelect');
-  if (!borrowerSelect) return;
-
   currentBorrowersList = [
     { farmer_id: 'DEMO001', district: 'Pune', state: 'Maharashtra', crop_type: 'Pulses', farm_area_acres: '5.66', loan_amount_inr: '182000', loan_term_months: '12', annual_interest_rate_pct: '9.65', irrigation_type: 'Mixed' },
     { farmer_id: 'DEMO002', district: 'Jaipur', state: 'Rajasthan', crop_type: 'Onion', farm_area_acres: '5.71', loan_amount_inr: '150000', loan_term_months: '18', annual_interest_rate_pct: '8.98', irrigation_type: 'Rainfed' },
@@ -81,14 +107,7 @@ function populateFallbackBorrowers() {
     { farmer_id: 'DEMO009', district: 'Dharwad', state: 'Karnataka', crop_type: 'Cotton', farm_area_acres: '11.65', loan_amount_inr: '186000', loan_term_months: '6', annual_interest_rate_pct: '7.92', irrigation_type: 'Drip' }
   ];
 
-  borrowerSelect.innerHTML = '';
-  currentBorrowersList.forEach(b => {
-    const opt = document.createElement('option');
-    opt.value = b.farmer_id;
-    opt.textContent = `${b.farmer_id} — ${b.district}, ${b.state} | ${b.crop_type} (₹${parseInt(b.loan_amount_inr).toLocaleString()})`;
-    borrowerSelect.appendChild(opt);
-  });
-
+  populateSelectsWithBorrowers(currentBorrowersList);
   populateFormFromBorrower('DEMO001');
   runRiskAssessment();
 }
@@ -114,17 +133,34 @@ function populateFormFromBorrower(farmerId) {
 
 async function runRiskAssessment() {
   const btnAssess = document.getElementById('btnRunRiskAssessment');
-  if (btnAssess) {
-    btnAssess.disabled = true;
-    btnAssess.innerHTML = `<i data-lucide="loader-2" class="spin"></i> Computing Risk...`;
-  }
+  const btnAssessPage = document.getElementById('btnRunRiskAssessmentPage');
+  
+  [btnAssess, btnAssessPage].forEach(btn => {
+    if (btn) {
+      btn.disabled = true;
+      btn.innerHTML = `<i data-lucide="loader-2" class="spin"></i> Computing Risk...`;
+    }
+  });
+  if (window.lucide) lucide.createIcons();
+
+  const resetButtons = () => {
+    [btnAssess, btnAssessPage].forEach(btn => {
+      if (btn) {
+        btn.disabled = false;
+        btn.innerHTML = `<i data-lucide="shield-check"></i> Evaluate Credit Risk`;
+      }
+    });
+    if (window.lucide) lucide.createIcons();
+  };
 
   const getVal = (id, def) => {
     const el = document.getElementById(id);
     return el ? el.value : def;
   };
 
-  const farmerId = getVal('riskBorrowerSelect', 'DEMO001');
+  const selPage = document.getElementById('riskBorrowerSelectPage');
+  const selDash = document.getElementById('riskBorrowerSelect');
+  const farmerId = (selPage && selPage.value) ? selPage.value : ((selDash && selDash.value) ? selDash.value : 'DEMO001');
   const payload = {
     farmer_id: farmerId,
     district: getVal('riskDistrict', 'Dharwad'),
@@ -138,30 +174,28 @@ async function runRiskAssessment() {
   };
 
   try {
-    const res = await fetch(`${API_BASE_RISK}/api/v2/risk/assess`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
-    });
+    try {
+      const res = await fetch(`${API_BASE_RISK}/api/v2/risk/assess`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
 
-    if (res.ok) {
-      const result = await res.json();
-      renderRiskResults(result);
-      if (btnAssess) {
-        btnAssess.disabled = false;
-        btnAssess.innerHTML = `<i data-lucide="shield-check"></i> Evaluate Credit Risk`;
+      if (res.ok) {
+        const result = await res.json();
+        renderRiskResults(result);
+        updateRiskRoleVisibility();
+        return;
       }
-      return;
+    } catch (err) {
+      console.warn('[RiskService] Assessment API error, running local evaluation fallback:', err);
     }
-  } catch (err) {
-    console.warn('[RiskService] Assessment API error, running local evaluation fallback:', err);
-  }
 
-  // Fallback client side evaluation
-  renderRiskResults(createFallbackRiskResult(payload));
-  if (btnAssess) {
-    btnAssess.disabled = false;
-    btnAssess.innerHTML = `<i data-lucide="shield-check"></i> Evaluate Credit Risk`;
+    // Fallback client side evaluation
+    renderRiskResults(createFallbackRiskResult(payload));
+    updateRiskRoleVisibility();
+  } finally {
+    resetButtons();
   }
 }
 
@@ -361,30 +395,74 @@ function renderSHAPChart(shapValues) {
   });
 }
 
+function getRiskAuthHeaders() {
+  try {
+    const saved = localStorage.getItem('AGRISURE_AUTH_SESSION') || sessionStorage.getItem('AGRISURE_AUTH_SESSION') || localStorage.getItem('NABARD_AUTH_SESSION') || sessionStorage.getItem('NABARD_AUTH_SESSION');
+    if (saved) {
+      const sess = JSON.parse(saved);
+      if (sess && sess.access_token) {
+        return {
+          'Authorization': `Bearer ${sess.access_token}`,
+          'Content-Type': 'application/json'
+        };
+      }
+    }
+  } catch (e) {}
+  return { 'Content-Type': 'application/json' };
+}
+
 async function runBatchPortfolioEvaluation() {
   const tableBody = document.getElementById('batchRiskTableBody');
   const btnBatch = document.getElementById('btnEvaluateBatchPortfolio');
+  const btnBatchPage = document.getElementById('btnEvaluateBatchPortfolioPage');
 
-  if (!tableBody) return;
-  tableBody.innerHTML = `<tr><td colspan="7" style="text-align: center; padding: 2rem; color: var(--text-muted);"><i data-lucide="loader-2" class="spin"></i> Evaluating 100 Borrower Records...</td></tr>`;
-
-  try {
-    const res = await fetch(`${API_BASE_RISK}/api/v2/risk/batch`);
-    if (res.ok) {
-      const result = await res.json();
-      renderBatchResults(result);
-      return;
+  [btnBatch, btnBatchPage].forEach(btn => {
+    if (btn) {
+      btn.disabled = true;
+      btn.innerHTML = `<i data-lucide="loader-2" class="spin"></i> Evaluating 100 Borrower Records...`;
     }
-  } catch (err) {
-    console.warn('[RiskService] Batch API error, using static batch evaluation:', err);
+  });
+  if (window.lucide) lucide.createIcons();
+
+  if (tableBody) {
+    tableBody.innerHTML = `<tr><td colspan="7" style="text-align: center; padding: 2.5rem; color: var(--text-muted);"><i data-lucide="loader-2" class="spin"></i> Computing Dual-Pillar Risk Engine across all 100 Borrower Records...</td></tr>`;
+    if (window.lucide) lucide.createIcons();
   }
 
-  // Local static evaluation fallback
-  renderBatchResults(createFallbackBatchResults());
+  try {
+    try {
+      const res = await fetch(`${API_BASE_RISK}/api/v2/risk/batch`, {
+        headers: getRiskAuthHeaders()
+      });
+      if (res.ok) {
+        const result = await res.json();
+        renderBatchResults(result);
+        return;
+      }
+    } catch (err) {
+      console.warn('[RiskService] Batch API error, using static batch evaluation:', err);
+    }
+
+    // Local static evaluation fallback (All 100 Borrowers)
+    renderBatchResults(createFallbackBatchResults());
+  } finally {
+    [btnBatch, btnBatchPage].forEach(btn => {
+      if (btn) {
+        btn.disabled = false;
+        btn.innerHTML = `<i data-lucide="layers"></i> Evaluate Entire Portfolio (100 Borrowers)`;
+      }
+    });
+    if (window.lucide) lucide.createIcons();
+  }
 }
 
+let currentBatchData = [];
+let currentBatchFiltered = [];
+let currentBatchPage = 1;
+const BATCH_PAGE_SIZE = 15;
+let isShowAllBatchRows = false;
+
 function renderBatchResults(result) {
-  const tableBody = document.getElementById('batchRiskTableBody');
   const summaryBox = document.getElementById('batchPortfolioSummaryBox');
 
   if (summaryBox && result.portfolio_summary) {
@@ -411,26 +489,121 @@ function renderBatchResults(result) {
     `;
   }
 
-  const borrowers = result.borrowers || [];
+  currentBatchData = result.borrowers || [];
+  currentBatchFiltered = [...currentBatchData];
+  currentBatchPage = 1;
+  isShowAllBatchRows = false;
+
+  setupBatchControls();
+  renderBatchTablePage();
+}
+
+function setupBatchControls() {
+  const searchInput = document.getElementById('batchRiskSearchInput');
+  const btnPrev = document.getElementById('btnBatchPrevPage');
+  const btnNext = document.getElementById('btnBatchNextPage');
+  const btnToggleAll = document.getElementById('btnBatchToggleAll');
+
+  if (searchInput && !searchInput.dataset.initialized) {
+    searchInput.dataset.initialized = "true";
+    let timer = null;
+    searchInput.addEventListener('input', (e) => {
+      clearTimeout(timer);
+      timer = setTimeout(() => {
+        const query = e.target.value.trim().toLowerCase();
+        if (!query) {
+          currentBatchFiltered = [...currentBatchData];
+        } else {
+          currentBatchFiltered = currentBatchData.filter(b => 
+            (b.farmer_id || '').toLowerCase().includes(query) ||
+            (b.district || '').toLowerCase().includes(query) ||
+            (b.crop || '').toLowerCase().includes(query) ||
+            (b.decision || '').toLowerCase().includes(query)
+          );
+        }
+        currentBatchPage = 1;
+        renderBatchTablePage();
+      }, 200);
+    });
+  }
+
+  if (btnPrev && !btnPrev.dataset.initialized) {
+    btnPrev.dataset.initialized = "true";
+    btnPrev.addEventListener('click', () => {
+      if (currentBatchPage > 1) {
+        currentBatchPage--;
+        renderBatchTablePage();
+      }
+    });
+  }
+
+  if (btnNext && !btnNext.dataset.initialized) {
+    btnNext.dataset.initialized = "true";
+    btnNext.addEventListener('click', () => {
+      const maxPage = Math.ceil(currentBatchFiltered.length / BATCH_PAGE_SIZE);
+      if (currentBatchPage < maxPage) {
+        currentBatchPage++;
+        renderBatchTablePage();
+      }
+    });
+  }
+
+  if (btnToggleAll && !btnToggleAll.dataset.initialized) {
+    btnToggleAll.dataset.initialized = "true";
+    btnToggleAll.addEventListener('click', () => {
+      isShowAllBatchRows = !isShowAllBatchRows;
+      btnToggleAll.textContent = isShowAllBatchRows ? "Paginate Rows (15 per page)" : "Show All 100 Rows";
+      renderBatchTablePage();
+    });
+  }
+}
+
+function renderBatchTablePage() {
+  const tableBody = document.getElementById('batchRiskTableBody');
+  const indicator = document.getElementById('batchRiskPageIndicator');
+  const btnPrev = document.getElementById('btnBatchPrevPage');
+  const btnNext = document.getElementById('btnBatchNextPage');
+
   if (!tableBody) return;
 
-  if (borrowers.length === 0) {
-    tableBody.innerHTML = `<tr><td colspan="7" style="text-align: center; padding: 2rem;">No borrowers evaluated.</td></tr>`;
+  const total = currentBatchFiltered.length;
+  if (total === 0) {
+    tableBody.innerHTML = `<tr><td colspan="7" style="text-align: center; padding: 2rem; color: var(--text-muted);">No matching borrower records found in batch portfolio.</td></tr>`;
+    if (indicator) indicator.textContent = `Showing 0 of ${currentBatchData.length} Borrowers`;
     return;
   }
 
+  let itemsToRender = [];
+  if (isShowAllBatchRows) {
+    itemsToRender = currentBatchFiltered;
+    if (indicator) indicator.textContent = `Showing all ${total} of ${currentBatchData.length} Borrowers`;
+    if (btnPrev) btnPrev.disabled = true;
+    if (btnNext) btnNext.disabled = true;
+  } else {
+    const totalPages = Math.ceil(total / BATCH_PAGE_SIZE);
+    currentBatchPage = Math.max(1, Math.min(currentBatchPage, totalPages));
+    
+    const startIdx = (currentBatchPage - 1) * BATCH_PAGE_SIZE;
+    const endIdx = Math.min(startIdx + BATCH_PAGE_SIZE, total);
+    itemsToRender = currentBatchFiltered.slice(startIdx, endIdx);
+
+    if (indicator) indicator.textContent = `Showing ${startIdx + 1}–${endIdx} of ${total} Borrowers (Page ${currentBatchPage} of ${totalPages})`;
+    if (btnPrev) btnPrev.disabled = (currentBatchPage === 1);
+    if (btnNext) btnNext.disabled = (currentBatchPage === totalPages);
+  }
+
   let html = '';
-  borrowers.forEach(b => {
+  itemsToRender.forEach(b => {
     let decCls = 'badge-warning';
     if (b.decision === 'APPROVED') decCls = 'badge-teal';
     else if (b.decision && (b.decision.includes('REJECTED') || b.decision.includes('HIGH RISK'))) decCls = 'badge-danger';
 
     html += `
-      <tr>
-        <td style="padding: 10px 14px; border-bottom: 1px solid var(--border-subtle); font-weight: 600;">${b.farmer_id}</td>
+      <tr style="cursor: pointer;" onclick="populateFormFromBorrower('${b.farmer_id}'); runRiskAssessment(); window.scrollTo({ top: 0, behavior: 'smooth' });" title="Click to view detailed dual-pillar risk assessment for ${b.farmer_id}">
+        <td style="padding: 10px 14px; border-bottom: 1px solid var(--border-subtle); font-weight: 700; color: #0d9488;">${b.farmer_id}</td>
         <td style="padding: 10px 14px; border-bottom: 1px solid var(--border-subtle);">${b.district}</td>
         <td style="padding: 10px 14px; border-bottom: 1px solid var(--border-subtle);">${b.crop}</td>
-        <td style="padding: 10px 14px; border-bottom: 1px solid var(--border-subtle);">₹${(b.loan_amount || 0).toLocaleString()}</td>
+        <td style="padding: 10px 14px; border-bottom: 1px solid var(--border-subtle); font-weight: 600;">₹${(b.loan_amount || 0).toLocaleString()}</td>
         <td style="padding: 10px 14px; border-bottom: 1px solid var(--border-subtle); font-weight: 700;">${b.credit_score}</td>
         <td style="padding: 10px 14px; border-bottom: 1px solid var(--border-subtle);">${b.pd_pct}%</td>
         <td style="padding: 10px 14px; border-bottom: 1px solid var(--border-subtle);"><span class="badge ${decCls}">${b.decision}</span></td>
@@ -499,23 +672,112 @@ function createFallbackRiskResult(p) {
 }
 
 function createFallbackBatchResults() {
+  const districts = ['Pune', 'Dharwad', 'Jaipur', 'Amravati', 'Warangal', 'Solapur', 'Agra', 'Belagavi', 'Indore', 'Rajkot', 'Prayagraj'];
+  const crops = ['Pulses', 'Cotton', 'Onion', 'Sugarcane', 'Wheat', 'Rice', 'Maize', 'Millet'];
+
+  const list = [];
+  let totalExposure = 0;
+  let totalEL = 0;
+  let approved = 0;
+  let conditional = 0;
+  let rejected = 0;
+
+  for (let i = 1; i <= 100; i++) {
+    const fid = `DEMO${String(i).padStart(3, '0')}`;
+    const dist = districts[i % districts.length];
+    const crop = crops[i % crops.length];
+    const loanAmt = 120000 + ((i * 3500) % 130000);
+
+    const baseScore = 550 + ((i * 37) % 310);
+    const pdPct = Math.round(Math.max(2.1, Math.min(45.0, ((900 - baseScore) / 600) * 40 + 2.0)) * 10) / 10;
+    const el = Math.round(loanAmt * (pdPct / 100) * 0.35);
+
+    let dec = 'APPROVED';
+    if (baseScore >= 700) {
+      dec = 'APPROVED';
+      approved++;
+    } else if (baseScore >= 600) {
+      dec = 'CONDITIONAL APPROVAL';
+      conditional++;
+    } else {
+      dec = 'HIGH RISK / REJECTED';
+      rejected++;
+    }
+
+    totalExposure += loanAmt;
+    totalEL += el;
+
+    list.push({
+      farmer_id: fid,
+      district: dist,
+      crop: crop,
+      loan_amount: loanAmt,
+      credit_score: baseScore,
+      pd_pct: pdPct,
+      expected_loss: el,
+      dscr: Math.round((1.1 + (baseScore - 550) / 300) * 100) / 100,
+      decision: dec
+    });
+  }
+
   return {
     portfolio_summary: {
       total_borrowers_evaluated: 100,
-      approved_count: 58,
-      conditional_count: 32,
-      rejected_count: 10,
-      approved_pct: 90.0,
-      total_loan_exposure_inr: 16500000,
-      total_expected_loss_inr: 577500,
-      portfolio_expected_loss_pct: 3.5
+      approved_count: approved,
+      conditional_count: conditional,
+      rejected_count: rejected,
+      approved_pct: Math.round(((approved + conditional) / 100) * 100),
+      total_loan_exposure_inr: totalExposure,
+      total_expected_loss_inr: totalEL,
+      portfolio_expected_loss_pct: Math.round((totalEL / totalExposure) * 1000) / 10
     },
-    borrowers: [
-      { farmer_id: 'DEMO001', district: 'Pune', crop: 'Pulses', loan_amount: 182000, credit_score: 640, pd_pct: 9.8, decision: 'CONDITIONAL APPROVAL' },
-      { farmer_id: 'DEMO002', district: 'Jaipur', crop: 'Onion', loan_amount: 150000, credit_score: 590, pd_pct: 16.2, decision: 'HIGH RISK / REJECTED' },
-      { farmer_id: 'DEMO004', district: 'Amravati', crop: 'Sugarcane', loan_amount: 183000, credit_score: 745, pd_pct: 3.2, decision: 'APPROVED' },
-      { farmer_id: 'DEMO005', district: 'Warangal', crop: 'Wheat', loan_amount: 184000, credit_score: 780, pd_pct: 2.1, decision: 'APPROVED' },
-      { farmer_id: 'DEMO009', district: 'Dharwad', crop: 'Cotton', loan_amount: 186000, credit_score: 620, pd_pct: 11.4, decision: 'CONDITIONAL APPROVAL' }
-    ]
+    borrowers: list
   };
 }
+
+function updateRiskRoleVisibility() {
+  let isOfficer = false;
+  try {
+    const saved = localStorage.getItem('AGRISURE_AUTH_SESSION') || sessionStorage.getItem('AGRISURE_AUTH_SESSION') || localStorage.getItem('NABARD_AUTH_SESSION') || sessionStorage.getItem('NABARD_AUTH_SESSION');
+    if (saved) {
+      const sess = JSON.parse(saved);
+      if (sess && sess.user && sess.user.role === 'bank_officer') {
+        isOfficer = true;
+      }
+    }
+  } catch (e) {}
+
+  const btnContainer = document.getElementById('officerChangeBorrowerBtnContainer');
+  const officerSelectCard = document.getElementById('riskOfficerBorrowerSelectCard');
+  const decisionCard = document.getElementById('riskOfficerDecisionCard');
+  const batchCard = document.getElementById('riskBatchPortfolioCard');
+
+  if (btnContainer) btnContainer.style.display = isOfficer ? 'block' : 'none';
+  if (officerSelectCard) officerSelectCard.style.display = isOfficer ? 'block' : 'none';
+  if (decisionCard) decisionCard.style.display = isOfficer ? 'block' : 'none';
+  if (batchCard) batchCard.style.display = isOfficer ? 'block' : 'none';
+
+  // Target label update
+  const targetLabel = document.getElementById('riskEvaluatedTargetLabel');
+  if (targetLabel) {
+    if (isOfficer) {
+      const borrowerSelect = document.getElementById('riskBorrowerSelectPage') || document.getElementById('riskBorrowerSelect');
+      const text = (borrowerSelect && borrowerSelect.options && borrowerSelect.options.length > 0 && borrowerSelect.selectedIndex >= 0) ? borrowerSelect.options[borrowerSelect.selectedIndex].text : 'DEMO001';
+      targetLabel.textContent = `Borrower Application Record: ${text}`;
+    } else {
+      let farmerName = 'Farmer Borrower';
+      try {
+        const saved = localStorage.getItem('AGRISURE_AUTH_SESSION') || sessionStorage.getItem('AGRISURE_AUTH_SESSION');
+        if (saved) {
+          const sess = JSON.parse(saved);
+          if (sess && sess.user && sess.user.full_name) farmerName = sess.user.full_name;
+        }
+      } catch (e) {}
+      targetLabel.textContent = `My Personal Credit Risk Assessment — Farm Telemetry & Financial Score (${farmerName})`;
+    }
+  }
+}
+window.updateRiskRoleVisibility = updateRiskRoleVisibility;
+window.runRiskAssessment = runRiskAssessment;
+window.populateFormFromBorrower = populateFormFromBorrower;
+
