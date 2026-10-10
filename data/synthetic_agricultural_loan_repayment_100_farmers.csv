@@ -1,5 +1,5 @@
 farmer_id,state,district,crop_type,farm_area_acres,irrigation_type,loan_id,loan_purpose,loan_amount_inr,estimated_annual_farm_income_inr,loan_term_months,annual_interest_rate_pct,previous_loan_count,previous_repayment_history,rainfall_deviation_pct,estimated_yield_change_pct,days_past_due,amount_overdue_inr,repayment_status,default_flag,data_type
-DEMO001,Maharashtra,Pune,Pulses,5.66,Mixed,LOAN001,Seasonal working capital,182000,120000,12,9.65,3,Occasional delay,34,11,0,0,Approved - Active KCC Record,0,SYNTHETIC_DEMO_NOT_REAL_FARMER_DATA
+DEMO001,Maharashtra,Pune,Pulses,5.66,Mixed,LOAN001,Seasonal working capital,182000,120000,12,9.65,3,Occasional delay,34,11,0,0,Rejected - Officer Determination,0,SYNTHETIC_DEMO_NOT_REAL_FARMER_DATA
 DEMO002,Rajasthan,Jaipur,Onion,5.71,Rainfed,LOAN002,Seasonal working capital,150000,115000,18,8.98,4,Occasional delay,-23,-12,1,3000,Active - current,0,SYNTHETIC_DEMO_NOT_REAL_FARMER_DATA
 DEMO003,Uttar Pradesh,Prayagraj,Rice,5.97,Rainfed,LOAN003,Equipment,60000,246000,24,9.79,5,Repeated delays,15,0,127,26000,Defaulted,1,SYNTHETIC_DEMO_NOT_REAL_FARMER_DATA
 DEMO004,Maharashtra,Amravati,Sugarcane,5.64,Drip,LOAN004,Seeds and fertilizers,183000,161000,24,8.52,4,Occasional delay,-10,-3,1,4000,Repaid,0,SYNTHETIC_DEMO_NOT_REAL_FARMER_DATA
@@ -99,8 +99,8 @@ DEMO097,Uttar Pradesh,Prayagraj,Maize,2.64,Mixed,LOAN097,Post-harvest storage,13
 DEMO098,Maharashtra,Pune,Onion,5.48,Rainfed,LOAN098,Equipment,55000,259000,9,9.0,1,Repaid on time,-18,-18,38,38000,Overdue,1,SYNTHETIC_DEMO_NOT_REAL_FARMER_DATA
 DEMO099,Maharashtra,Nashik,Millet,1.83,Rainfed,LOAN099,Equipment,51000,71000,6,10.18,2,Occasional delay,-36,-16,1,1000,Repaid,0,SYNTHETIC_DEMO_NOT_REAL_FARMER_DATA
 DEMO100,Karnataka,Dharwad,Wheat,11.42,Borewell,LOAN100,Equipment,206000,272000,12,9.28,1,Repeated delays,-19,-7,0,0,Repaid,0,SYNTHETIC_DEMO_NOT_REAL_FARMER_DATA
-DEMO001,Maharashtra,Pune,Pulses,5.66,Mixed,APP-2026-3857,Kharif Crop Production & Micro-Irrigation Upgrade,150000.0,120000.0,12,8.5,1,Repaid on time,0.0,0.0,0,25000.0,Approved - Active KCC Record,0,SUBMITTED_FARMER_LOAN_APPLICATION
-DEMO001,Maharashtra,Pune,Pulses,5.66,Mixed,APP-2026-7457,Solar Irrigation Pump Setup,250000.0,120000.0,24,8.5,1,Repaid on time,0.0,0.0,0,0,Approved - Active KCC Record,0,SUBMITTED_FARMER_LOAN_APPLICATION
-DEMO001,Maharashtra,Pune,Pulses,5.66,Mixed,APP-2026-8837,Solar Irrigation Pump Setup,250000.0,120000.0,24,8.5,1,Repaid on time,0.0,0.0,0,0,Approved - Active KCC Record,0,SUBMITTED_FARMER_LOAN_APPLICATION
-DEMO001,Maharashtra,Pune,Pulses,5.66,Mixed,APP-2026-4555,Solar Irrigation Pump Setup,250000.0,120000.0,24,8.5,1,Repaid on time,0.0,0.0,0,0,Approved - Active KCC Record,0,SUBMITTED_FARMER_LOAN_APPLICATION
-DEMO001,Maharashtra,Pune,Pulses,5.66,Mixed,APP-2026-1747,Solar Irrigation Pump Setup,250000.0,120000.0,24,8.5,1,Repaid on time,0.0,0.0,0,0,Approved - Active KCC Record,0,SUBMITTED_FARMER_LOAN_APPLICATION
+DEMO001,Maharashtra,Pune,Pulses,5.66,Mixed,APP-2026-3857,Kharif Crop Production & Micro-Irrigation Upgrade,150000.0,120000.0,12,8.5,1,Repaid on time,0.0,0.0,0,25000.0,Rejected - Officer Determination,0,SUBMITTED_FARMER_LOAN_APPLICATION
+DEMO001,Maharashtra,Pune,Pulses,5.66,Mixed,APP-2026-7457,Solar Irrigation Pump Setup,250000.0,120000.0,24,8.5,1,Repaid on time,0.0,0.0,0,0,Rejected - Officer Determination,0,SUBMITTED_FARMER_LOAN_APPLICATION
+DEMO001,Maharashtra,Pune,Pulses,5.66,Mixed,APP-2026-8837,Solar Irrigation Pump Setup,250000.0,120000.0,24,8.5,1,Repaid on time,0.0,0.0,0,0,Rejected - Officer Determination,0,SUBMITTED_FARMER_LOAN_APPLICATION
+DEMO001,Maharashtra,Pune,Pulses,5.66,Mixed,APP-2026-4555,Solar Irrigation Pump Setup,250000.0,120000.0,24,8.5,1,Repaid on time,0.0,0.0,0,0,Rejected - Officer Determination,0,SUBMITTED_FARMER_LOAN_APPLICATION
+DEMO001,Maharashtra,Pune,Pulses,5.66,Mixed,APP-2026-1747,Solar Irrigation Pump Setup,250000.0,120000.0,24,8.5,1,Repaid on time,0.0,0.0,0,0,Rejected - Officer Determination,0,SUBMITTED_FARMER_LOAN_APPLICATION
