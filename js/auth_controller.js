@@ -66,7 +66,7 @@ function updateNavbarAuthUI() {
     document.getElementById('btnLogout')?.addEventListener('click', handleLogout);
   } else {
     container.innerHTML = `
-      <a href="#/login" class="btn-primary" style="padding: 6px 14px; font-size: 0.85rem; text-decoration: none; display: inline-flex; align-items: center; gap: 6px;">
+      <a href="/login" class="btn-primary" style="padding: 6px 14px; font-size: 0.85rem; text-decoration: none; display: inline-flex; align-items: center; gap: 6px;">
         <i data-lucide="user"></i> Login / Register
       </a>
     `;
@@ -258,7 +258,7 @@ function setupAuthEventListeners() {
         currentUserSession = data;
         localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(data));
         updateNavbarAuthUI();
-        window.location.hash = '#/officer';
+        if (window.navigateTo) window.navigateTo('/officer');
         if (window.loadOfficerPortalData) window.loadOfficerPortalData();
       } else {
         const msg = data.detail?.message || data.detail || 'Officer registration failed.';
@@ -291,7 +291,7 @@ function setupAuthEventListeners() {
   document.getElementById('btnReturnToDashboard')?.addEventListener('click', () => {
     document.getElementById('loanSuccessScreenCard').style.display = 'none';
     document.getElementById('loanFormCard').style.display = 'block';
-    window.location.hash = '#/dashboard';
+    if (window.navigateTo) window.navigateTo('/dashboard');
   });
 
   // Officer Record Lending Decision Form on Risk Page
@@ -605,10 +605,10 @@ async function executeLogin(username, password, loginType, errorElemId) {
     alert(`Welcome back, ${data.user.full_name || data.user.sub}! Successfully logged in as ${data.user.role === 'bank_officer' ? 'Bank Officer' : 'Farmer'}.`);
 
     if (data.user.role === 'bank_officer') {
-      window.location.hash = '#/dashboard';
+      if (window.navigateTo) window.navigateTo('/officer');
       if (window.renderOfficerDashboardView) window.renderOfficerDashboardView();
     } else {
-      window.location.hash = '#/dashboard';
+      if (window.navigateTo) window.navigateTo('/dashboard');
       loadFarmerDashboardData();
     }
     
@@ -654,7 +654,7 @@ async function executeRegister(username, password, fullName, district, state, ph
     closeAuthModal();
 
     alert(`Registration successful! Welcome, ${data.user.full_name} (${data.user.farmer_id}).`);
-    window.location.hash = '#/dashboard';
+    if (window.navigateTo) window.navigateTo('/dashboard');
     loadFarmerDashboardData();
     if (window.handleRouting) window.handleRouting();
 
@@ -744,16 +744,16 @@ function handleLogout() {
   if (farmerLoansContainer) farmerLoansContainer.style.display = 'block';
 
   alert('You have logged out.');
-  window.location.hash = '#/dashboard';
+  if (window.navigateTo) window.navigateTo('/dashboard');
   if (window.handleRouting) window.handleRouting();
 }
 
 function openAuthModal() {
-  window.location.hash = '#/login';
+  if (window.navigateTo) window.navigateTo('/login');
 }
 
 function closeAuthModal() {
-  window.location.hash = '#/dashboard';
+  if (window.navigateTo) window.navigateTo('/dashboard');
 }
 
 function escapeHtml(str) {
@@ -761,7 +761,45 @@ function escapeHtml(str) {
 }
 
 /**
- * Handles Google OAuth Sign-In button click with environment status checking
+ * Executes Google Demo Sign-In fallback when Google OAuth keys are not configured
+ */
+async function executeGoogleDemoLogin(role = 'farmer') {
+  try {
+    const res = await fetch(`${API_BASE_AUTH}/api/v2/auth/google/demo?role=${role}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' }
+    });
+    const data = await res.json();
+    if (res.ok && data.access_token) {
+      currentUserSession = data;
+      localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(data));
+      updateNavbarAuthUI();
+
+      const modal = document.getElementById('googleOauthModal');
+      if (modal) modal.style.display = 'none';
+
+      alert(`Google Sign-In successful (Demo Mode)! Welcome, ${data.user.full_name}.`);
+
+      if (data.user.role === 'bank_officer') {
+        if (window.navigateTo) window.navigateTo('/officer');
+        if (window.renderOfficerDashboardView) window.renderOfficerDashboardView();
+      } else {
+        if (window.navigateTo) window.navigateTo('/dashboard');
+        loadFarmerDashboardData();
+      }
+      if (window.handleRouting) window.handleRouting();
+    } else {
+      alert('Google Demo Login failed: ' + (data.detail?.message || data.detail || 'Unknown error'));
+    }
+  } catch (err) {
+    console.error('Google Demo login error:', err);
+    alert('Server connection error during Google Demo Sign-In.');
+  }
+}
+window.executeGoogleDemoLogin = executeGoogleDemoLogin;
+
+/**
+ * Handles Google OAuth Sign-In button click with environment status checking & seamless fallback
  */
 async function handleGoogleSignInClick() {
   try {
@@ -778,20 +816,14 @@ async function handleGoogleSignInClick() {
         alert('Failed to obtain Google authorization URL.');
       }
     } else {
-      // Credentials not configured in .env: display clean setup notification modal
-      const modal = document.getElementById('googleOauthModal');
-      if (modal) {
-        modal.style.display = 'flex';
-        if (window.lucide && typeof window.lucide.createIcons === 'function') {
-          window.lucide.createIcons();
-        }
-      } else {
-        alert('Google OAuth Configuration Required:\nPlease copy .env.example to .env and set GOOGLE_CLIENT_ID & GOOGLE_CLIENT_SECRET.\nIn the meantime, use the quick demo login buttons below.');
-      }
+      // Credentials not configured in .env: seamlessly authenticate via Demo Google account
+      console.log('[Google Auth] GOOGLE_CLIENT_ID not set in .env — executing Google Demo Sign-In fallback.');
+      await executeGoogleDemoLogin('farmer');
     }
   } catch (err) {
     console.error('Error checking Google Auth config:', err);
-    alert('Could not verify Google OAuth configuration status. Please ensure backend server is running.');
+    // Connection error fallback to demo mode
+    await executeGoogleDemoLogin('farmer');
   }
 }
 
@@ -803,7 +835,7 @@ async function checkOAuthCallback() {
   const code = urlParams.get('code');
   if (code) {
     try {
-      window.history.replaceState({}, document.title, window.location.pathname + window.location.hash);
+      window.history.replaceState({}, document.title, window.location.pathname);
       const res = await fetch(`${API_BASE_AUTH}/api/v2/auth/google/token`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -816,9 +848,9 @@ async function checkOAuthCallback() {
         updateNavbarAuthUI();
         alert(`Google Sign-In successful! Welcome, ${data.user.full_name} (${data.user.role.toUpperCase()}).`);
         if (data.user.role === 'bank_officer') {
-          window.location.hash = '#/officer';
+          if (window.navigateTo) window.navigateTo('/officer');
         } else {
-          window.location.hash = '#/dashboard';
+          if (window.navigateTo) window.navigateTo('/dashboard');
           loadFarmerDashboardData();
         }
       } else {

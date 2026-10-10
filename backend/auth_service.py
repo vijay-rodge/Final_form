@@ -643,6 +643,65 @@ def authenticate_google_user(payload: GoogleAuthRequest):
         "user": token_payload
     }
 
+@router.post("/google/demo")
+def authenticate_google_demo_user(role: str = Query("farmer")):
+    """Demo login fallback when Google OAuth keys are not configured in environment."""
+    email = "google.officer@bank.org" if role == "bank_officer" else "google.farmer@agrisure.in"
+    full_name = "Anil Deshmukh (Google Demo Officer)" if role == "bank_officer" else "Ramesh Patil (Google Demo Farmer)"
+    user_role = "bank_officer" if role == "bank_officer" else "farmer"
+    google_sub = f"google_demo_{role}_sub"
+
+    users = load_users()
+    existing_user = None
+    for u in users:
+        if u.get("google_sub") == google_sub or u.get("email", "").lower() == email:
+            existing_user = u
+            break
+
+    if existing_user:
+        existing_user["full_name"] = full_name
+        existing_user["role"] = user_role
+        existing_user["google_sub"] = google_sub
+        existing_user["email"] = email
+        save_users(users)
+        db_user = existing_user
+    else:
+        num = 101 + len(users)
+        db_user = {
+            "username": email,
+            "email": email,
+            "google_sub": google_sub,
+            "full_name": full_name,
+            "role": user_role,
+            "auth_provider": "google",
+            "farmer_id": f"DEMO{num:03d}" if user_role == "farmer" else None,
+            "officer_id": f"OFFICER_GOOGLE_{num:03d}" if user_role == "bank_officer" else None,
+            "district": "Dharwad",
+            "state": "Karnataka"
+        }
+        users.append(db_user)
+        save_users(users)
+
+    token_payload = {
+        "sub": db_user["username"],
+        "email": email,
+        "role": user_role,
+        "full_name": full_name,
+        "farmer_id": db_user.get("farmer_id"),
+        "officer_id": db_user.get("officer_id"),
+        "auth_provider": "google"
+    }
+
+    access_token = create_access_token(token_payload)
+
+    return {
+        "status": "success",
+        "message": f"Successfully authenticated via Google (Demo Mode) as {full_name}.",
+        "access_token": access_token,
+        "token_type": "bearer",
+        "user": token_payload
+    }
+
 @router.get("/me")
 def get_current_user_profile(current_user: Dict[str, Any] = Depends(get_current_user)):
     """Returns profile details for the current authenticated user."""

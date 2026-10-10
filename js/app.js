@@ -1,20 +1,31 @@
 // AgriSure Climate-Aware Credit Risk Assessment — Application Controller
-// Handles Hash Routing, Navigation, Active States, and Mobile Menu Toggle
+// Handles Clean URL Routing (History API), Navigation, Active States, and Mobile Menu Toggle
 
 document.addEventListener('DOMContentLoaded', () => {
   initTabNavigation();
+  initGlobalLinkInterceptor();
   initMobileMenu();
   
-  // Listen for browser URL hash changes (Back / Forward navigation)
-  window.addEventListener('hashchange', handleRouting);
+  // Check if redirected from static server 404 fallback
+  const redirectPath = sessionStorage.getItem('agrisure_spa_redirect');
+  if (redirectPath) {
+    sessionStorage.removeItem('agrisure_spa_redirect');
+    navigateTo(redirectPath);
+    return;
+  }
+
+  // Listen for browser Back / Forward history navigation
+  window.addEventListener('popstate', handleRouting);
   
   // Initial route evaluation on page load
   handleRouting();
 });
 
-// Route Map
+// Route Map (Clean Path -> DOM Container ID)
 const ROUTES = {
+  '': 'tab-dashboard',
   'dashboard': 'tab-dashboard',
+  'farmer': 'tab-dashboard',
   'loans': 'tab-loans',
   'crops': 'tab-crops',
   'climate': 'tab-climate',
@@ -25,6 +36,29 @@ const ROUTES = {
 };
 
 /**
+ * Programmatically navigates to a clean URL path using HTML5 History API
+ */
+function navigateTo(path) {
+  let cleanRoute = (path || '/dashboard').replace(/^#\/?/, '').trim();
+  if (!cleanRoute.startsWith('/')) {
+    cleanRoute = '/' + cleanRoute;
+  }
+
+  // Update browser address bar without page refresh
+  if (window.location.pathname !== cleanRoute) {
+    window.history.pushState({}, '', cleanRoute);
+  }
+
+  // If there was a hash in URL, clear it cleanly
+  if (window.location.hash) {
+    window.history.replaceState({}, '', cleanRoute);
+  }
+
+  handleRouting();
+}
+window.navigateTo = navigateTo;
+
+/**
  * Initializes click handlers for navigation tabs
  */
 function initTabNavigation() {
@@ -32,8 +66,9 @@ function initTabNavigation() {
 
   tabs.forEach(tab => {
     tab.addEventListener('click', (e) => {
+      e.preventDefault();
       const route = tab.getAttribute('data-route') || 'dashboard';
-      window.location.hash = `#/${route}`;
+      navigateTo('/' + route);
       
       // Close mobile drawer on tab click if open
       const navTabsContainer = document.getElementById('mainNav');
@@ -47,15 +82,63 @@ function initTabNavigation() {
 }
 
 /**
- * Handles client-side hash routing and DOM visibility updates
+ * Intercepts all internal link clicks for smooth SPA navigation without full reloads
+ */
+function initGlobalLinkInterceptor() {
+  document.addEventListener('click', (e) => {
+    const link = e.target.closest('a');
+    if (!link) return;
+
+    const href = link.getAttribute('href');
+    if (!href) return;
+
+    // Handle hash fragments on same page vs clean route navigation
+    if (href.startsWith('#/')) {
+      e.preventDefault();
+      const cleanPath = href.replace(/^#/, '');
+      navigateTo(cleanPath);
+      return;
+    }
+
+    if (href.startsWith('/') && !href.startsWith('//')) {
+      // Don't intercept API downloads or external assets
+      if (href.startsWith('/api') || href.startsWith('/css') || href.startsWith('/js') || href.startsWith('/data') || href.includes('.')) {
+        return;
+      }
+      e.preventDefault();
+      navigateTo(href);
+    }
+  });
+}
+
+/**
+ * Handles client-side clean URL routing and DOM visibility updates
  */
 function handleRouting() {
-  const rawHash = window.location.hash || '#/dashboard';
-  // Normalize hash (e.g. "#/login" -> "login", "#/register" -> "register")
-  let routeName = rawHash.replace(/^#\/?/, '').toLowerCase().trim();
+  // If legacy hash fragment exists, clean it up to pushState clean URL
+  if (window.location.hash && window.location.hash.startsWith('#/')) {
+    const legacyRoute = window.location.hash.replace(/^#\/?/, '').toLowerCase().trim();
+    if (ROUTES[legacyRoute] !== undefined) {
+      window.history.replaceState({}, '', '/' + (legacyRoute === 'dashboard' ? 'dashboard' : legacyRoute));
+    }
+  }
+
+  // Extract clean route name from location.pathname (e.g. "/login" -> "login")
+  let path = window.location.pathname.replace(/^\/+|\/+$/g, '').toLowerCase().trim();
   
-  // Default to 'dashboard' if route is unknown or empty
-  if (!ROUTES[routeName]) {
+  // Default to 'dashboard' if route is empty or index.html
+  let routeName = path;
+  if (!routeName || routeName === 'index.html') {
+    routeName = 'dashboard';
+  }
+
+  // Alias /farmer to /dashboard
+  if (routeName === 'farmer') {
+    routeName = 'dashboard';
+  }
+
+  // Default to 'dashboard' if route is unknown
+  if (ROUTES[routeName] === undefined) {
     routeName = 'dashboard';
   }
 
@@ -110,6 +193,7 @@ function handleRouting() {
   // Scroll to top of main content on page switch
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
+window.handleRouting = handleRouting;
 
 /**
  * Initializes mobile responsive hamburger menu toggle

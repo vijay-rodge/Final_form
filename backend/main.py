@@ -93,7 +93,7 @@ if FASTAPI_AVAILABLE:
             "version": "2.0.0"
         }
 
-    SPA_PAGE_ROUTES = {"auth", "dashboard", "loans", "crops", "climate", "risk", "officer"}
+    SPA_PAGE_ROUTES = {"auth", "dashboard", "loans", "crops", "climate", "risk", "officer", "login", "register", "farmer"}
 
     @app.get("/auth/google/callback")
     @app.get("/auth/google/callback/")
@@ -177,5 +177,7 @@ if FASTAPI_AVAILABLE:
 
 if __name__ == "__main__":
     import uvicorn
-    print("[AgriSure Backend] Launching Phase 2 Telemetry Server on http://localhost:8000 ...")
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    default_port = 8080 if "--8080" in sys.argv else 8000
+    port = int(os.getenv("PORT", default_port))
+    print(f"[AgriSure Backend] Launching Phase 2 Telemetry & SPA Server on http://localhost:{port} ...")
+    uvicorn.run(app, host="0.0.0.0", port=port)

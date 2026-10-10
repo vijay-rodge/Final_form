@@ -35,7 +35,7 @@ function initRiskUI() {
 
   const handleAssessClick = () => {
     runRiskAssessment();
-    window.location.hash = '#/risk';
+    if (window.navigateTo) window.navigateTo('/risk');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
@@ -44,7 +44,7 @@ function initRiskUI() {
 
   const handleBatchClick = () => {
     runBatchPortfolioEvaluation();
-    window.location.hash = '#/risk';
+    if (window.navigateTo) window.navigateTo('/risk');
     setTimeout(() => {
       const batchEl = document.getElementById('riskBatchPortfolioCard');
       if (batchEl) batchEl.scrollIntoView({ behavior: 'smooth' });

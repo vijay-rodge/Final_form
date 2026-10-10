@@ -1,9 +1,9 @@
 [
   {
-    "assessment_id": "ASSESS-20261010101021",
+    "assessment_id": "ASSESS-20261010115114",
     "farmer_id": "DEMO001",
     "loan_id": "LOAN001",
-    "timestamp": "2026-10-10T10:10:21.594022",
+    "timestamp": "2026-10-10T11:51:14.843754",
     "model_version": "v2.1-prototype-calibrated",
     "overall_risk_classification": "Moderate",
     "climate_risk_classification": "Low",
@@ -128,10 +128,10 @@
         }
       ],
       "missing_fields": [
-        "Satellite Live NDVI Vegetation Stream",
         "satellite_ndvi",
+        "Live APMC Mandi Price API",
         "market_apmc_live",
-        "Live APMC Mandi Price API"
+        "Satellite Live NDVI Vegetation Stream"
       ],
       "demo_data_badges": [
         "Satellite NDVI: Simulated Demo Benchmark",
@@ -571,10 +571,10 @@
     }
   },
   {
-    "assessment_id": "ASSESS-20261010095224",
+    "assessment_id": "ASSESS-20261010103058",
     "farmer_id": "DEMO013",
     "loan_id": "LOAN013",
-    "timestamp": "2026-10-10T09:52:24.939712",
+    "timestamp": "2026-10-10T10:30:58.618768",
     "model_version": "v2.1-prototype-calibrated",
     "overall_risk_classification": "Moderate",
     "climate_risk_classification": "Low",
@@ -960,10 +960,10 @@
     }
   },
   {
-    "assessment_id": "ASSESS-20261010095224",
+    "assessment_id": "ASSESS-20261010103100",
     "farmer_id": "DEMO003",
     "loan_id": "LOAN003",
-    "timestamp": "2026-10-10T09:52:24.404416",
+    "timestamp": "2026-10-10T10:31:00.539370",
     "model_version": "v2.1-prototype-calibrated",
     "overall_risk_classification": "High",
     "climate_risk_classification": "Moderate",
@@ -1536,10 +1536,10 @@
     }
   },
   {
-    "assessment_id": "ASSESS-20261010095224",
+    "assessment_id": "ASSESS-20261010103053",
     "farmer_id": "DEMO006",
     "loan_id": "LOAN006",
-    "timestamp": "2026-10-10T09:52:24.559717",
+    "timestamp": "2026-10-10T10:30:53.139839",
     "model_version": "v2.1-prototype-calibrated",
     "overall_risk_classification": "Moderate",
     "climate_risk_classification": "Moderate",
@@ -2704,10 +2704,10 @@
     }
   },
   {
-    "assessment_id": "ASSESS-20261010095224",
+    "assessment_id": "ASSESS-20261010103104",
     "farmer_id": "DEMO012",
     "loan_id": "LOAN012",
-    "timestamp": "2026-10-10T09:52:24.880698",
+    "timestamp": "2026-10-10T10:31:04.273662",
     "model_version": "v2.1-prototype-calibrated",
     "overall_risk_classification": "Low",
     "climate_risk_classification": "Low",
@@ -3082,10 +3082,10 @@
     }
   },
   {
-    "assessment_id": "ASSESS-20261010095225",
+    "assessment_id": "ASSESS-20261010102626",
     "farmer_id": "DEMO015",
     "loan_id": "LOAN015",
-    "timestamp": "2026-10-10T09:52:25.052197",
+    "timestamp": "2026-10-10T10:26:26.213439",
     "model_version": "v2.1-prototype-calibrated",
     "overall_risk_classification": "Moderate",
     "climate_risk_classification": "Low",

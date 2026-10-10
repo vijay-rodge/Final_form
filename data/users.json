@@ -44,5 +44,29 @@
     "officer_id": "OFFICER_002",
     "full_name": "Priya Singh (Regional Credit Manager)",
     "branch": "AgriSure State Headquarters"
+  },
+  {
+    "username": "google.farmer@agrisure.in",
+    "email": "google.farmer@agrisure.in",
+    "google_sub": "google_demo_farmer_sub",
+    "full_name": "Ramesh Patil (Google Demo Farmer)",
+    "role": "farmer",
+    "auth_provider": "google",
+    "farmer_id": "DEMO106",
+    "officer_id": null,
+    "district": "Dharwad",
+    "state": "Karnataka"
+  },
+  {
+    "username": "google.officer@bank.org",
+    "email": "google.officer@bank.org",
+    "google_sub": "google_demo_bank_officer_sub",
+    "full_name": "Anil Deshmukh (Google Demo Officer)",
+    "role": "bank_officer",
+    "auth_provider": "google",
+    "farmer_id": null,
+    "officer_id": "OFFICER_GOOGLE_107",
+    "district": "Dharwad",
+    "state": "Karnataka"
   }
 ]
