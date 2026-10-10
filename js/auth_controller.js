@@ -308,12 +308,27 @@ function setupAuthEventListeners() {
  */
 async function loadFarmerDashboardData() {
   const dashContainer = document.getElementById('farmerDashboardContainer');
-  if (!dashContainer) return;
+  const officerDashContainer = document.getElementById('officerDashboardContainer');
 
   if (!currentUserSession || !currentUserSession.access_token) {
-    dashContainer.style.display = 'none';
+    if (dashContainer) dashContainer.style.display = 'none';
+    if (officerDashContainer) officerDashContainer.style.display = 'none';
     return;
   }
+
+  // Bank Officer View: Hide farmer profile & personal apply options, show Officer Desk
+  if (currentUserSession?.user?.role === 'bank_officer') {
+    if (dashContainer) dashContainer.style.display = 'none';
+    if (officerDashContainer) officerDashContainer.style.display = 'block';
+    if (window.renderOfficerDashboardView) {
+      window.renderOfficerDashboardView();
+    }
+    return;
+  }
+
+  // Farmer View: Hide officer desk, show farmer dashboard
+  if (officerDashContainer) officerDashContainer.style.display = 'none';
+  if (!dashContainer) return;
 
   try {
     const res = await fetch(`${API_BASE_AUTH}/api/v2/farmers/me/dashboard`, {
@@ -326,6 +341,13 @@ async function loadFarmerDashboardData() {
     }
 
     const data = await res.json();
+    if (data.status === 'officer_role') {
+      dashContainer.style.display = 'none';
+      if (officerDashContainer) officerDashContainer.style.display = 'block';
+      if (window.renderOfficerDashboardView) window.renderOfficerDashboardView();
+      return;
+    }
+
     dashContainer.style.display = 'block';
 
     // Populate profile fields
@@ -369,7 +391,7 @@ async function loadFarmerDashboardData() {
           <td style="padding: 10px 14px;">
             <span class="badge ${app.status === 'Approved' ? 'badge-teal' : (app.status === 'Rejected' ? 'badge-rose' : 'badge-cyan')}">${escapeHtml(app.status)}</span>
           </td>
-          <td style="padding: 10px 14px; font-size: 0.8rem; color: var(--text-muted);">${escapeHtml(app.officer_notes || 'In Queue')}</td>
+          <td style="padding: 10px 14px; font-size: 0.8rem; color: var(--text-body);">${escapeHtml(app.officer_notes || 'Application placed in Bank Officer review queue.')}</td>
         </tr>
       `).join('');
     }
@@ -380,10 +402,34 @@ async function loadFarmerDashboardData() {
 }
 
 /**
- * Prefills Loan Application Form using Backend Endpoint
+ * Initializes Loan Records View based on logged-in user role:
+ * If Bank Officer: Hides farmer application form, shows Officer Incoming Approval/Reject Desk and Loan Records Dataset
+ * If Farmer: Shows Loan Application Form prefilled from profile
+ */
+async function initLoansPageView() {
+  const farmerContainer = document.getElementById('farmerLoansViewContainer');
+  const officerContainer = document.getElementById('officerLoansViewContainer');
+
+  if (currentUserSession && currentUserSession.user && currentUserSession.user.role === 'bank_officer') {
+    if (farmerContainer) farmerContainer.style.display = 'none';
+    if (officerContainer) officerContainer.style.display = 'block';
+    if (window.loadOfficerLoansView) window.loadOfficerLoansView();
+    return;
+  }
+
+  // Farmer / Public: Hide officer container, show farmer application form
+  if (officerContainer) officerContainer.style.display = 'none';
+  if (farmerContainer) farmerContainer.style.display = 'block';
+  prefillLoanApplicationForm();
+}
+
+/**
+ * Prefills Loan Application Form using Backend Endpoint (Farmers only)
  */
 async function prefillLoanApplicationForm() {
   if (!currentUserSession || !currentUserSession.access_token) return;
+  // Officers must NEVER have their names prefilled in farmer loan application forms
+  if (currentUserSession.user && currentUserSession.user.role === 'bank_officer') return;
 
   try {
     const res = await fetch(`${API_BASE_AUTH}/api/v2/farmers/me/application-prefill`, {
@@ -564,7 +610,8 @@ async function executeLogin(username, password, loginType, errorElemId) {
     alert(`Welcome back, ${data.user.full_name || data.user.sub}! Successfully logged in as ${data.user.role === 'bank_officer' ? 'Bank Officer' : 'Farmer'}.`);
 
     if (data.user.role === 'bank_officer') {
-      window.location.hash = '#/risk';
+      window.location.hash = '#/dashboard';
+      if (window.renderOfficerDashboardView) window.renderOfficerDashboardView();
     } else {
       window.location.hash = '#/dashboard';
       loadFarmerDashboardData();
@@ -691,8 +738,16 @@ function handleLogout() {
   localStorage.removeItem(AUTH_STORAGE_KEY);
   sessionStorage.removeItem(AUTH_STORAGE_KEY);
   updateNavbarAuthUI();
+
   const dashContainer = document.getElementById('farmerDashboardContainer');
   if (dashContainer) dashContainer.style.display = 'none';
+  const officerDashContainer = document.getElementById('officerDashboardContainer');
+  if (officerDashContainer) officerDashContainer.style.display = 'none';
+  const officerLoansContainer = document.getElementById('officerLoansViewContainer');
+  if (officerLoansContainer) officerLoansContainer.style.display = 'none';
+  const farmerLoansContainer = document.getElementById('farmerLoansViewContainer');
+  if (farmerLoansContainer) farmerLoansContainer.style.display = 'block';
+
   alert('You have logged out.');
   window.location.hash = '#/dashboard';
   if (window.handleRouting) window.handleRouting();
@@ -782,4 +837,5 @@ async function checkOAuthCallback() {
 
 window.loadFarmerDashboardData = loadFarmerDashboardData;
 window.prefillLoanApplicationForm = prefillLoanApplicationForm;
+window.initLoansPageView = initLoansPageView;
 window.handleGoogleSignInClick = handleGoogleSignInClick;

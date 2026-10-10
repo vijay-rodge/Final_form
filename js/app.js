@@ -86,10 +86,14 @@ function handleRouting() {
   });
 
   // Execute route-specific data load & auth route initializers
-  if (routeName === 'dashboard' && window.loadFarmerDashboardData) {
-    window.loadFarmerDashboardData();
-  } else if (routeName === 'loans' && window.prefillLoanApplicationForm) {
-    window.prefillLoanApplicationForm();
+  if (routeName === 'dashboard') {
+    if (window.loadFarmerDashboardData) window.loadFarmerDashboardData();
+  } else if (routeName === 'loans') {
+    if (window.initLoansPageView) {
+      window.initLoansPageView();
+    } else if (window.prefillLoanApplicationForm) {
+      window.prefillLoanApplicationForm();
+    }
   } else if (routeName === 'officer' && window.loadOfficerPortalData) {
     window.loadOfficerPortalData();
   } else if (isAuthRoute && window.initAuthPageRoute) {

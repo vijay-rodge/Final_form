@@ -360,6 +360,13 @@ def get_logged_in_farmer_dashboard(
     current_user: Dict[str, Any] = Depends(get_current_user)
 ):
     """Retrieves full personalized dashboard data for the authenticated farmer."""
+    if current_user.get("role") == "bank_officer":
+        return {
+            "status": "officer_role",
+            "is_officer": True,
+            "message": "Authenticated user is a Bank Officer."
+        }
+
     farmer_id = current_user.get("farmer_id") or "DEMO001"
     farmers = load_all_farmers_data()
     matched_records = [f for f in farmers if normalize_string(f["farmer_id"]) == normalize_string(farmer_id)]
@@ -382,12 +389,13 @@ def get_logged_in_farmer_dashboard(
         except Exception:
             pass
 
-    dec_map = {}
+    app_dec_map = {}
+    farmer_dec_map = {}
     for d in decisions:
         if d.get("application_id"):
-            dec_map[d.get("application_id")] = d
+            app_dec_map[str(d.get("application_id")).upper()] = d
         if d.get("farmer_id"):
-            dec_map[d.get("farmer_id")] = d
+            farmer_dec_map[str(d.get("farmer_id")).upper()] = d
 
     application_history = []
     for idx, rec in enumerate(matched_records):
@@ -398,7 +406,7 @@ def get_logged_in_farmer_dashboard(
             num_part = re.sub(r'\D', '', lid) or str(idx + 1)
             app_id_code = f"APP-2026-{(8000 + int(num_part)):04d}"
 
-        my_decision = dec_map.get(app_id_code) or dec_map.get(lid) or dec_map.get(matched["farmer_id"])
+        my_decision = app_dec_map.get(app_id_code.upper()) or app_dec_map.get(lid.upper()) or (farmer_dec_map.get(str(matched["farmer_id"]).upper()) if len(matched_records) == 1 else None)
 
         rec_status = "Submitted"
         if my_decision:

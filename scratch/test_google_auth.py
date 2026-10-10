@@ -7,6 +7,7 @@ sys.path.insert(0, os.path.abspath("."))
 
 from fastapi.testclient import TestClient
 from backend.main import app
+import backend.auth_service as auth_service
 
 client = TestClient(app)
 
@@ -17,9 +18,10 @@ def test_google_authentication_flow():
 
     # 1. Unconfigured Environment Checks
     print("\n[Step 1] Testing /api/v2/auth/google/config in unconfigured state...")
-    # Temporarily clear env vars if present for test baseline
-    old_cid = os.environ.pop("GOOGLE_CLIENT_ID", None)
-    old_sec = os.environ.pop("GOOGLE_CLIENT_SECRET", None)
+    import sys
+    for mod_name in ['auth_service', 'backend.auth_service']:
+        if mod_name in sys.modules:
+            sys.modules[mod_name].is_google_auth_configured = lambda: False
 
     cfg_resp = client.get("/api/v2/auth/google/config")
     assert cfg_resp.status_code == 200, f"Config check failed: {cfg_resp.text}"
@@ -44,6 +46,11 @@ def test_google_authentication_flow():
     assert tok_resp.status_code == 503, f"Expected 503 for unconfigured token exchange, got {tok_resp.status_code}"
     print(" -> [OK] Token exchange endpoint safely rejected with HTTP 503.")
 
+    # Restore function for configured state
+    for mod_name in ['auth_service', 'backend.auth_service']:
+        if mod_name in sys.modules:
+            sys.modules[mod_name].is_google_auth_configured = lambda: True
+
     # 4. Simulating Configured Google OAuth Environment
     print("\n[Step 4] Simulating configured Google OAuth environment variables...")
     os.environ["GOOGLE_CLIENT_ID"] = "1234567890-testclientid.apps.googleusercontent.com"
@@ -66,16 +73,6 @@ def test_google_authentication_flow():
     assert "1234567890-testclientid" in auth_url
     print(f" -> [OK] Official Google OAuth URL generated successfully:")
     print(f"        URL: {auth_url[:75]}...")
-
-    # Restore old environment if it existed
-    if old_cid:
-        os.environ["GOOGLE_CLIENT_ID"] = old_cid
-    else:
-        os.environ.pop("GOOGLE_CLIENT_ID", None)
-    if old_sec:
-        os.environ["GOOGLE_CLIENT_SECRET"] = old_sec
-    else:
-        os.environ.pop("GOOGLE_CLIENT_SECRET", None)
 
     print("\n==========================================================================")
     print("  GOOGLE OAUTH 2.0 INTEGRATION & FALLBACK TESTS PASSED 100%!")

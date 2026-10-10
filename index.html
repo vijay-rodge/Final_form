@@ -153,9 +153,75 @@
 
       </div>
 
+      <!-- Bank Officer Executive Operations Dashboard Card (Populated when bank_officer is logged in) -->
+      <div id="officerDashboardContainer" class="card" style="display: none; background: #ffffff; border: 1.5px solid #0d9488; margin-bottom: 2rem; box-shadow: var(--shadow-md);">
+        <div class="card-header" style="background: linear-gradient(135deg, #0d9488 0%, #06b6d4 100%); color: #ffffff; border-bottom: none; border-radius: 8px 8px 0 0;">
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <div style="width: 44px; height: 44px; background: rgba(255,255,255,0.2); color: #ffffff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.3rem;">
+              <i data-lucide="shield-check"></i>
+            </div>
+            <div>
+              <h3 class="card-title" style="color: #ffffff; margin: 0;">Bank Officer Credit Operations Desk</h3>
+              <p style="margin: 0; font-size: 0.82rem; opacity: 0.95;" id="dashOfficerWelcome">Authorized Credit Officer: Anil Deshmukh | AgriSure Regional Office</p>
+            </div>
+          </div>
+          <a href="#/loans" class="btn-secondary" style="background: #ffffff; color: #0d9488; padding: 7px 14px; font-size: 0.85rem; text-decoration: none; font-weight: 700; display: inline-flex; align-items: center; gap: 6px; border: none;">
+            <i data-lucide="file-spreadsheet"></i> View All Loan Records
+          </a>
+        </div>
 
+        <div style="padding: 1.25rem;">
+          <!-- Officer KPI Stats Grid -->
+          <div class="grid-4col" style="gap: 1rem; margin-bottom: 1.5rem;">
+            <div style="background: #f8fafc; padding: 1rem; border-radius: var(--radius-sm); border-left: 4px solid #06b6d4;">
+              <div style="font-size: 0.75rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase;">Awaiting Review</div>
+              <div style="font-size: 1.6rem; font-weight: 800; color: #06b6d4;" id="dashOfficerPendingCount">0</div>
+              <div style="font-size: 0.72rem; color: var(--text-muted);">Incoming Farmer Requests</div>
+            </div>
 
-      <!-- Agricultural Datasets Summary Card -->
+            <div style="background: #f8fafc; padding: 1rem; border-radius: var(--radius-sm); border-left: 4px solid #0d9488;">
+              <div style="font-size: 0.75rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase;">Under Active Review</div>
+              <div style="font-size: 1.6rem; font-weight: 800; color: #0d9488;" id="dashOfficerReviewCount">0</div>
+              <div style="font-size: 0.72rem; color: var(--text-muted);">In-Depth Telemetry Analysis</div>
+            </div>
+
+            <div style="background: #f8fafc; padding: 1rem; border-radius: var(--radius-sm); border-left: 4px solid #10b981;">
+              <div style="font-size: 0.75rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase;">Approved Loans</div>
+              <div style="font-size: 1.6rem; font-weight: 800; color: #10b981;" id="dashOfficerApprovedCount">0</div>
+              <div style="font-size: 0.72rem; color: var(--text-muted);">Sanctioned & Recorded</div>
+            </div>
+
+            <div style="background: #f8fafc; padding: 1rem; border-radius: var(--radius-sm); border-left: 4px solid #e11d48;">
+              <div style="font-size: 0.75rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase;">Rejected / Declined</div>
+              <div style="font-size: 1.6rem; font-weight: 800; color: #e11d48;" id="dashOfficerRejectedCount">0</div>
+              <div style="font-size: 0.72rem; color: var(--text-muted);">High Climate or Credit Risk</div>
+            </div>
+          </div>
+
+          <!-- Section: Incoming Farmer Application Requests -->
+          <div>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 8px;">
+              <div>
+                <h4 style="font-size: 1rem; font-weight: 800; color: var(--text-main); margin: 0;"><i data-lucide="inbox"></i> Incoming Farmer Loan Application Requests</h4>
+                <p style="margin: 2px 0 0 0; font-size: 0.8rem; color: var(--text-muted);">Review and approve/reject farmer loan applications. Use "Delete Row" to dismiss processed applications from this active desk.</p>
+              </div>
+              <div style="display: flex; gap: 8px;">
+                <button class="btn-secondary" style="font-size: 0.78rem; padding: 5px 10px;" onclick="resetDismissedApps()">
+                  <i data-lucide="rotate-ccw"></i> Restore Cleared Rows
+                </button>
+              </div>
+            </div>
+
+            <!-- Rectangular Application Bars Container -->
+            <div id="dashOfficerAppBarsContainer">
+              <div style="text-align: center; padding: 2rem; color: var(--text-muted); background: #f8fafc; border-radius: 8px;">
+                <i data-lucide="loader-2" class="spin"></i> Loading farmer loan applications...
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <div class="card" style="background: linear-gradient(135deg, #f0fdf4 0%, #e6fffa 100%); border: 1px solid #99f6e4; margin-bottom: 2rem;">
         <div class="card-header" style="border-bottom: 1px solid #ccfbf1;">
           <h3 class="card-title" style="color: #0f766e;"><i data-lucide="database"></i> Agricultural Datasets Overview (Kaggle Ingestion Complete)</h3>
@@ -236,27 +302,122 @@
         </div>
       </div>
 
-      <!-- Dataset Table Placeholder -->
-      <div class="card">
-        <div class="card-header">
-          <h3 class="card-title"><i data-lucide="database"></i> Loan Records Dataset Placeholder</h3>
-          <span class="badge badge-slate"><i data-lucide="lock"></i> Integration Pending</span>
+      <!-- Officer Loan Applications & Loan Records Container (Visible to Bank Officers) -->
+      <div id="officerLoansViewContainer" style="display: none;">
+        
+        <!-- Section 1: Incoming Farmer Applications (Approval & Rejection Dashboard) -->
+        <div class="card" style="border: 1.5px solid #0d9488; margin-bottom: 2rem;">
+          <div class="card-header" style="background: linear-gradient(135deg, #0d9488 0%, #06b6d4 100%); color: #ffffff;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <i data-lucide="file-check" style="width: 24px; height: 24px;"></i>
+              <div>
+                <h3 class="card-title" style="color: #ffffff; margin: 0;">Incoming Farmer Loan Applications (Approval & Rejection Desk)</h3>
+                <p style="margin: 2px 0 0 0; font-size: 0.8rem; opacity: 0.95;">Direct farmer loan requests awaiting credit sanction. Approve or reject, and use "Delete Row" to dismiss old applications.</p>
+              </div>
+            </div>
+            <div style="display: flex; gap: 8px;">
+              <button class="btn-secondary" style="background: #ffffff; color: #0d9488; font-size: 0.78rem; padding: 5px 12px; border: none; font-weight: 700;" onclick="resetDismissedApps()">
+                <i data-lucide="rotate-ccw"></i> Restore Cleared Rows
+              </button>
+            </div>
+          </div>
+
+          <div style="padding: 1.25rem;">
+            <!-- Rectangular Bars Container for Officer Loan Records Page -->
+            <div id="officerLoansAppBarsContainer">
+              <div style="text-align: center; padding: 2rem; color: var(--text-muted); background: #f8fafc; border-radius: 8px;">
+                <i data-lucide="loader-2" class="spin"></i> Loading farmer loan applications...
+              </div>
+            </div>
+          </div>
         </div>
 
-        <div class="placeholder-box">
-          <div class="placeholder-icon">
-            <i data-lucide="table-properties"></i>
+        <!-- Section 2: Full Agricultural Loan Records Dataset Table -->
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <h3 class="card-title"><i data-lucide="table"></i> Official Agricultural Loan Records Dataset (100+ Farmers)</h3>
+              <p style="margin: 2px 0 0 0; font-size: 0.8rem; color: var(--text-muted);">Historical and active loan portfolio with comprehensive financial, crop, interest, and repayment metrics.</p>
+            </div>
+            <span class="badge badge-teal">100+ Records Portfolio</span>
           </div>
-          <h4 class="placeholder-title">Loan Dataset Management Table</h4>
-          <p class="placeholder-text">
-            The interactive loan records table, filtering controls, and repayment analysis features will be implemented in subsequent phases. Data from <code>synthetic_agricultural_loan_repayment_100_farmers.csv</code> remains untouched.
-          </p>
-          <div style="display: flex; justify-content: center; gap: 1rem; flex-wrap: wrap;">
-            <span class="badge badge-teal"><i data-lucide="check"></i> File Location: <code>data/synthetic_agricultural_loan_repayment_100_farmers.csv</code></span>
-            <span class="badge badge-cyan"><i data-lucide="check"></i> 100 Synthetic Farmer Records</span>
+
+          <div style="padding: 1.25rem;">
+            <!-- Filter & Search Controls -->
+            <div class="grid-3col" style="margin-bottom: 1rem;">
+              <div class="form-group" style="margin-bottom: 0;">
+                <label for="loanRecordsSearch">Search Loan Records</label>
+                <input type="text" id="loanRecordsSearch" class="form-control" placeholder="Search by Farmer ID, Loan ID, District, Crop...">
+              </div>
+
+              <div class="form-group" style="margin-bottom: 0;">
+                <label for="loanRecordsStatusFilter">Filter by Repayment Status</label>
+                <select id="loanRecordsStatusFilter" class="form-control">
+                  <option value="All" selected>All Repayment Statuses</option>
+                  <option value="Active">Active Loans</option>
+                  <option value="Repaid">Repaid on Time</option>
+                  <option value="Overdue">Overdue / Delayed</option>
+                  <option value="Approved">Approved - Officer Sanctioned</option>
+                  <option value="Rejected">Rejected</option>
+                </select>
+              </div>
+
+              <div style="display: flex; align-items: flex-end; gap: 8px;">
+                <button class="btn-primary" style="padding: 9px 16px; font-size: 0.85rem;" onclick="loadLoanRecordsTable(1)">
+                  <i data-lucide="filter"></i> Apply Filters
+                </button>
+              </div>
+            </div>
+
+            <!-- Table Container -->
+            <div style="overflow-x: auto; border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); margin-bottom: 1rem;">
+              <table class="data-table" style="width: 100%; border-collapse: collapse;">
+                <thead>
+                  <tr>
+                    <th style="padding: 10px 12px; background: #f8fafc; text-align: left;">Loan ID</th>
+                    <th style="padding: 10px 12px; background: #f8fafc; text-align: left;">Farmer ID</th>
+                    <th style="padding: 10px 12px; background: #f8fafc; text-align: left;">Location</th>
+                    <th style="padding: 10px 12px; background: #f8fafc; text-align: left;">Crop & Land</th>
+                    <th style="padding: 10px 12px; background: #f8fafc; text-align: left;">Loan Amount</th>
+                    <th style="padding: 10px 12px; background: #f8fafc; text-align: left;">Annual Income</th>
+                    <th style="padding: 10px 12px; background: #f8fafc; text-align: left;">Interest Rate</th>
+                    <th style="padding: 10px 12px; background: #f8fafc; text-align: left;">Repayment Status</th>
+                    <th style="padding: 10px 12px; background: #f8fafc; text-align: center;">Default Risk</th>
+                  </tr>
+                </thead>
+                <tbody id="loanRecordsTableBody">
+                  <tr>
+                    <td colspan="9" style="text-align: center; padding: 2rem; color: var(--text-muted);">
+                      <i data-lucide="loader-2" class="spin"></i> Loading loan records...
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <!-- Pagination Bar -->
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+              <div style="font-size: 0.85rem; color: var(--text-muted);" id="loanRecordsPaginationInfo">
+                Showing 1 - 15 of 100 records
+              </div>
+              <div style="display: flex; gap: 8px;">
+                <button id="btnPrevLoanPage" class="btn-secondary" style="padding: 6px 14px; font-size: 0.82rem;" onclick="changeLoanRecordsPage(-1)">
+                  <i data-lucide="chevron-left"></i> Previous
+                </button>
+                <span id="currentLoanPageLabel" style="display: inline-flex; align-items: center; padding: 0 10px; font-weight: 700; font-size: 0.85rem;">Page 1</span>
+                <button id="btnNextLoanPage" class="btn-secondary" style="padding: 6px 14px; font-size: 0.82rem;" onclick="changeLoanRecordsPage(1)">
+                  Next <i data-lucide="chevron-right"></i>
+                </button>
+              </div>
+            </div>
+
           </div>
         </div>
+
       </div>
+
+      <!-- Farmer Loan Container (Only visible to authenticated Farmers) -->
+      <div id="farmerLoansViewContainer" style="display: none;">
 
       <!-- Comprehensive Multi-Section Loan Application Form Card -->
       <div id="loanFormCard" class="card" style="margin-top: 1.5rem; border: 1px solid #0d9488;">
@@ -478,6 +639,8 @@
           <i data-lucide="layout-dashboard"></i> Return to My Farmer Dashboard
         </button>
       </div>
+
+      </div><!-- end #farmerLoansViewContainer -->
     </section>
 
     <!-- PAGE: AGRICULTURAL DATASETS & INSIGHTS VIEW -->
@@ -1329,6 +1492,52 @@
         </div>
 
       </div>
+    </div>
+  </div>
+
+  <!-- Quick Action Confirm Modal (1-Click Approve / Reject from Application Bars) -->
+  <div id="quickActionModalOverlay" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(4px); z-index: 99999; align-items: center; justify-content: center; padding: 1rem;">
+    <div style="background: #ffffff; width: 100%; max-width: 560px; border-radius: 12px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); border: 1px solid var(--border-subtle); overflow: hidden;">
+      <div id="quickActionHeader" style="background: linear-gradient(135deg, #0d9488 0%, #06b6d4 100%); padding: 1.25rem 1.5rem; color: #ffffff; display: flex; justify-content: space-between; align-items: center;">
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <div id="quickActionIconBox" style="width: 40px; height: 40px; border-radius: 50%; background: rgba(255,255,255,0.2); display: flex; align-items: center; justify-content: center; font-size: 1.25rem;">
+            <i data-lucide="check-circle" id="quickActionIcon"></i>
+          </div>
+          <div>
+            <h3 style="margin: 0; font-size: 1.15rem; font-weight: 800; color: #ffffff;" id="quickActionTitle">Confirm Loan Approval</h3>
+            <p style="margin: 2px 0 0 0; font-size: 0.8rem; opacity: 0.9;" id="quickActionSubtitle">Application: APP-2026-9551 | Farmer: Ramesh Patil</p>
+          </div>
+        </div>
+        <button type="button" onclick="closeQuickActionModal()" style="background: none; border: none; color: #ffffff; font-size: 1.6rem; cursor: pointer; padding: 0; line-height: 1;">&times;</button>
+      </div>
+
+      <form id="formQuickAction" style="padding: 1.5rem;" onsubmit="submitQuickActionConfirm(event)">
+        <input type="hidden" id="quickActionAppId">
+        <input type="hidden" id="quickActionType" value="approve">
+
+        <div id="quickActionAlert" class="info-alert" style="display: none; margin-bottom: 1rem;"></div>
+
+        <div id="quickActionAmountGroup" class="form-group" style="margin-bottom: 1rem;">
+          <label for="quickActionAmount" style="font-size: 0.85rem; font-weight: 700; color: var(--text-main);">Approved Loan Amount (₹) *</label>
+          <input type="number" id="quickActionAmount" class="form-control" style="font-size: 1rem; font-weight: 700; color: #0d9488;" required>
+          <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 4px;">Requested Amount by Farmer: <strong id="quickActionReqAmountLabel">₹1,50,000</strong></div>
+        </div>
+
+        <div class="form-group" style="margin-bottom: 1.25rem;">
+          <label for="quickActionNotes" style="font-size: 0.85rem; font-weight: 700; color: var(--text-main);" id="quickActionNotesLabel">Officer Review Notes & Risk Determination *</label>
+          <textarea id="quickActionNotes" class="form-control" rows="3" required></textarea>
+          <div style="font-size: 0.74rem; color: var(--text-muted); margin-top: 4px;">
+            💡 This decision note will be immediately visible on the farmer's dashboard and permanently saved in the official loan records.
+          </div>
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; gap: 10px;">
+          <button type="button" class="btn-secondary" onclick="closeQuickActionModal()" style="padding: 8px 18px; font-weight: 600;">Cancel</button>
+          <button type="submit" id="btnConfirmQuickAction" class="btn-primary" style="padding: 8px 22px; font-weight: 700; background: #10b981; border: none;">
+            <i data-lucide="check"></i> Confirm Approval
+          </button>
+        </div>
+      </form>
     </div>
   </div>
 
