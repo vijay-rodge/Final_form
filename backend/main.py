@@ -28,14 +28,10 @@ from farmer_data_service import router as farmer_router
 from auth_service import router as auth_router
 from officer_service import router as officer_router
 
-# Check FastAPI availability
-try:
-    from fastapi import FastAPI, HTTPException, Query
-    from fastapi.middleware.cors import CORSMiddleware
-    from fastapi.responses import FileResponse
-    FASTAPI_AVAILABLE = True
-except ImportError:
-    FASTAPI_AVAILABLE = False
+from fastapi import FastAPI, HTTPException, Query
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
 
 # Instantiate Phase 2 Services
 weather_service = OpenMeteoWeatherService()
@@ -50,77 +46,77 @@ risk_engine = ClimateCreditRiskEngine()
 shap_engine = SHAPExplainabilityEngine()
 pdf_generator = PDFReportGenerator()
 
-if FASTAPI_AVAILABLE:
-    app = FastAPI(
-        title="AgriSure Climate Telemetry & Credit Risk API",
-        description="AgriSure Real Environmental Telemetry API: Open-Meteo Weather, Copernicus Sentinel-2, & ISRIC SoilGrids.",
-        version="2.0.0"
-    )
+# Top-level FastAPI Application Instance (Required by Vercel & Uvicorn)
+app = FastAPI(
+    title="AgriSure Climate Telemetry & Credit Risk API",
+    description="AgriSure Real Environmental Telemetry API: Open-Meteo Weather, Copernicus Sentinel-2, & ISRIC SoilGrids.",
+    version="2.0.0"
+)
 
-    app.add_middleware(
-        CORSMiddleware,
-        allow_origins=["*"],
-        allow_credentials=True,
-        allow_methods=["*"],
-        allow_headers=["*"],
-    )
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
-    app.include_router(auth_router)
-    app.include_router(crop_router)
-    app.include_router(risk_router)
-    app.include_router(farmer_router)
-    app.include_router(officer_router)
+app.include_router(auth_router)
+app.include_router(crop_router)
+app.include_router(risk_router)
+app.include_router(farmer_router)
+app.include_router(officer_router)
 
-    # Mount Static Web Application Files (checks frontend/ directory first)
-    from fastapi.staticfiles import StaticFiles
-    project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    frontend_dir = os.path.join(project_root, "frontend")
-    static_root = frontend_dir if os.path.exists(frontend_dir) else project_root
+# Mount Static Web Application Files (checks frontend/ directory first)
+from fastapi.staticfiles import StaticFiles
+project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+frontend_dir = os.path.join(project_root, "frontend")
+static_root = frontend_dir if os.path.exists(frontend_dir) else project_root
 
-    css_path = os.path.join(static_root, "css")
-    js_path = os.path.join(static_root, "js")
-    data_path = os.path.join(static_root, "data")
+css_path = os.path.join(static_root, "css")
+js_path = os.path.join(static_root, "js")
+data_path = os.path.join(static_root, "data")
 
-    if os.path.exists(css_path):
-        app.mount("/css", StaticFiles(directory=css_path), name="css")
-    if os.path.exists(js_path):
-        app.mount("/js", StaticFiles(directory=js_path), name="js")
-    if os.path.exists(data_path):
-        app.mount("/data", StaticFiles(directory=data_path), name="data")
+if os.path.exists(css_path):
+    app.mount("/css", StaticFiles(directory=css_path), name="css")
+if os.path.exists(js_path):
+    app.mount("/js", StaticFiles(directory=js_path), name="js")
+if os.path.exists(data_path):
+    app.mount("/data", StaticFiles(directory=data_path), name="data")
 
-    @app.get("/")
-    def read_root():
+@app.get("/")
+def read_root():
+    index_path = os.path.join(static_root, "index.html")
+    if os.path.exists(index_path):
+        return FileResponse(index_path)
+    return {
+        "system": "AgriSure Climate-Aware Credit Risk System API",
+        "phase": "Phase 2 Environmental Telemetry Active",
+        "version": "2.0.0"
+    }
+
+SPA_PAGE_ROUTES = {"auth", "dashboard", "loans", "crops", "climate", "risk", "officer", "login", "register", "farmer"}
+
+@app.get("/auth/google/callback")
+@app.get("/auth/google/callback/")
+@app.get("/api/auth/google/callback")
+@app.get("/api/auth/google/callback/")
+def top_level_google_auth_callback(
+    code: Optional[str] = Query(None),
+    state: Optional[str] = Query(None),
+    error: Optional[str] = Query(None),
+    iss: Optional[str] = Query(None)
+):
+    from auth_service import google_auth_callback
+    return google_auth_callback(code=code, state=state, error=error, iss=iss)
+
+@app.get("/{page_route}")
+def serve_spa_page(page_route: str):
+    if page_route.lower() in SPA_PAGE_ROUTES:
         index_path = os.path.join(static_root, "index.html")
         if os.path.exists(index_path):
             return FileResponse(index_path)
-        return {
-            "system": "AgriSure Climate-Aware Credit Risk System API",
-            "phase": "Phase 2 Environmental Telemetry Active",
-            "version": "2.0.0"
-        }
-
-    SPA_PAGE_ROUTES = {"auth", "dashboard", "loans", "crops", "climate", "risk", "officer", "login", "register", "farmer"}
-
-    @app.get("/auth/google/callback")
-    @app.get("/auth/google/callback/")
-    @app.get("/api/auth/google/callback")
-    @app.get("/api/auth/google/callback/")
-    def top_level_google_auth_callback(
-        code: Optional[str] = Query(None),
-        state: Optional[str] = Query(None),
-        error: Optional[str] = Query(None),
-        iss: Optional[str] = Query(None)
-    ):
-        from auth_service import google_auth_callback
-        return google_auth_callback(code=code, state=state, error=error, iss=iss)
-
-    @app.get("/{page_route}")
-    def serve_spa_page(page_route: str):
-        if page_route.lower() in SPA_PAGE_ROUTES:
-            index_path = os.path.join(static_root, "index.html")
-            if os.path.exists(index_path):
-                return FileResponse(index_path)
-        raise HTTPException(status_code=404, detail=f"Endpoint or page '/{page_route}' not found.")
+    raise HTTPException(status_code=404, detail=f"Endpoint or page '/{page_route}' not found.")
 
     # Endpoint 1: Open-Meteo Weather API
     @app.get("/api/v2/climate/weather")
